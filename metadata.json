@@ -1,0 +1,6 @@
+{
+  "name": "Gestão de Salão",
+  "description": "Aplicativo completo de gestão para salão de beleza com caixa/financeiro, agendamentos, serviços, profissionais, clientes, NFS-e e WhatsApp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
