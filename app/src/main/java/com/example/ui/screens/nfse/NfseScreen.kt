@@ -2,8 +2,11 @@ package com.example.ui.screens.nfse
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -33,7 +36,7 @@ import com.example.ui.SalonViewModel
 import com.example.ui.components.StatusBadgeChip
 import com.example.utils.MaskUtils
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun NfseScreen(
     viewModel: SalonViewModel,
@@ -90,16 +93,17 @@ fun NfseScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Status:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    Text("Status:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
                     listOf(null to "Todas", "EMITIDA" to "Emitidas", "CANCELADA" to "Canceladas").forEach { (st, label) ->
                         FilterChip(
                             selected = selectedStatusFilter == st,
                             onClick = { selectedStatusFilter = st },
-                            label = { Text(label, fontSize = 12.sp) }
+                            label = { Text(label, fontSize = 12.sp, maxLines = 1, softWrap = false) }
                         )
                     }
                 }
@@ -203,6 +207,7 @@ fun NfseScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NfseListItem(
     nfse: NfseEntity,
@@ -282,33 +287,51 @@ fun NfseListItem(
 
             Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                TextButton(onClick = onPreview) {
-                    Icon(Icons.Outlined.Visibility, contentDescription = null, modifier = Modifier.size(16.dp))
+                TextButton(
+                    onClick = onPreview,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
+                ) {
+                    Icon(Icons.Outlined.Visibility, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Preview")
+                    Text("Preview", fontSize = 11.sp, maxLines = 1, softWrap = false)
                 }
 
-                TextButton(onClick = onDownloadXmlPdf) {
-                    Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                TextButton(
+                    onClick = onDownloadXmlPdf,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
+                ) {
+                    Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("XML/PDF")
+                    Text("XML/PDF", fontSize = 11.sp, maxLines = 1, softWrap = false)
                 }
 
-                TextButton(onClick = onResend) {
-                    Icon(Icons.Outlined.Send, contentDescription = null, modifier = Modifier.size(16.dp))
+                TextButton(
+                    onClick = onResend,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
+                ) {
+                    Icon(Icons.Outlined.Send, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Reenviar")
+                    Text("Reenviar", fontSize = 11.sp, maxLines = 1, softWrap = false)
                 }
 
                 if (nfse.status == "EMITIDA") {
-                    TextButton(onClick = onCancel, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
-                        Icon(Icons.Outlined.Cancel, contentDescription = null, modifier = Modifier.size(16.dp))
+                    TextButton(
+                        onClick = onCancel,
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
+                    ) {
+                        Icon(Icons.Outlined.Cancel, contentDescription = null, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Cancelar")
+                        Text("Cancelar", fontSize = 11.sp, maxLines = 1, softWrap = false)
                     }
                 }
             }
@@ -390,7 +413,11 @@ fun NfseCancelDialog(
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
+            OutlinedButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+            ) {
                 Text("Voltar")
             }
         }

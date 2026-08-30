@@ -22,9 +22,15 @@ import kotlinx.coroutines.launch
         NfseConfigEntity::class,
         WhatsAppTemplateEntity::class,
         WhatsAppLogEntity::class,
-        FinancialTransactionEntity::class
+        FinancialTransactionEntity::class,
+        WhatsAppInboundMessageEntity::class,
+        ProfessionalNotificationEntity::class,
+        AiMonitoringConfigEntity::class,
+        WaitingQueueEntity::class,
+        ProcedureHistoryEntity::class,
+        VipSubscriptionEntity::class
     ],
-    version = 4,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -55,15 +61,30 @@ abstract class AppDatabase : RoomDatabase() {
         ) : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
-                INSTANCE?.let { database ->
-                    CoroutineScope(Dispatchers.IO).launch {
-                        populateDatabase(database.salonDao())
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        getDatabase(context).salonDao().let { populateDatabase(it) }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
                 }
             }
 
-            suspend fun populateDatabase(dao: SalonDao) {
-                // Settings
+            override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
+                super.onDestructiveMigration(db)
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        getDatabase(context).salonDao().let { populateDatabase(it) }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+
+        suspend fun populateDatabase(dao: SalonDao) {
+            // Settings
+            if (dao.getSettings() == null) {
                 dao.insertOrUpdateSettings(
                     SalonSettingsEntity(
                         id = 1,
@@ -77,6 +98,7 @@ abstract class AppDatabase : RoomDatabase() {
                         useDynamicColor = false
                     )
                 )
+            }
 
                 // Clients
                 val c1 = dao.insertClient(ClientEntity(name = "Mariana Silva", cpf = "123.456.789-01", phone = "(11) 98765-4321", email = "mariana@gmail.com", birthDate = "1994-07-15"))
@@ -229,8 +251,24 @@ abstract class AppDatabase : RoomDatabase() {
                 dao.insertWhatsAppTemplate(
                     WhatsAppTemplateEntity(
                         type = "PROMOTIONAL",
-                        title = "Campanha Aniversariantes / Promoção",
-                        templateText = "Parabéns, {nome_cliente}! No seu mês de aniversário, o {nome_salao} te presenteia com 15% OFF em serviços de {servico}. Agende seu momento especial!"
+                        title = "Campanha Aniversariantes do Mês",
+                        templateText = "Parabéns, {nome_cliente}! No seu mês de aniversário, o {nome_salao} te presenteia com 15% OFF em qualquer serviço. Agende seu momento especial conosco!"
+                    )
+                )
+
+                dao.insertWhatsAppTemplate(
+                    WhatsAppTemplateEntity(
+                        type = "PROMOTIONAL",
+                        title = "Cupom de Retorno (Clientes Ausentes)",
+                        templateText = "Olá {nome_cliente}! Estamos com saudades de você no {nome_salao}! Ganhe 20% OFF na sua próxima visita informando o cupom VOLTE20 ao agendar."
+                    )
+                )
+
+                dao.insertWhatsAppTemplate(
+                    WhatsAppTemplateEntity(
+                        type = "PROMOTIONAL",
+                        title = "Combo Fim de Semana Especial",
+                        templateText = "Olá {nome_cliente}! Que tal renovar seu visual para este fim de semana no {nome_salao}? Temos horários promocionais disponíveis para você!"
                     )
                 )
 
@@ -351,7 +389,132 @@ abstract class AppDatabase : RoomDatabase() {
                         notes = "Aguardando confirmação do comprovante"
                     )
                 )
+
+                // AI Monitoring Config Initial
+                dao.insertOrUpdateAiMonitoringConfig(
+                    AiMonitoringConfigEntity(
+                        id = 1,
+                        isMonitoringActive = true,
+                        autoApproveHighConfidence = false,
+                        notifyProfessionalWhatsApp = true,
+                        notifyAndroidSystem = true,
+                        smartAutoReply = true
+                    )
+                )
+
+                // Seed Inbound WhatsApp Messages (Analyzed by AI)
+                val inb1 = dao.insertInboundMessage(
+                    WhatsAppInboundMessageEntity(
+                        senderName = "Mariana Silva",
+                        senderPhone = "(11) 98765-4321",
+                        rawMessage = "Oi! Gostaria de agendar um Corte Feminino com a Beatriz para amanhã às 15:00 se tiver horário disponível.",
+                        timestamp = System.currentTimeMillis() - 15 * 60 * 1000,
+                        aiProcessed = true,
+                        detectedIntent = "NEW_APPOINTMENT",
+                        extractedClientName = "Mariana Silva",
+                        extractedServiceName = "Corte Feminino & Escova",
+                        extractedServiceId = s1,
+                        extractedProfessionalName = "Beatriz Oliveira",
+                        extractedProfessionalId = p1,
+                        extractedDate = today,
+                        extractedTime = "15:00",
+                        confidenceScore = 0.98f,
+                        customerSentiment = "POSITIVO",
+                        notes = "Cliente solicitou horário com preferência expressa pela cabeleireira Beatriz.",
+                        suggestedReply = "Olá Mariana! Temos o horário das 15:00 com a Beatriz livre sim. Seu agendamento foi registrado com sucesso!",
+                        status = "PENDENTE"
+                    )
+                )
+
+                val inb2 = dao.insertInboundMessage(
+                    WhatsAppInboundMessageEntity(
+                        senderName = "Carla Souza",
+                        senderPhone = "(11) 99123-4567",
+                        rawMessage = "Boa tarde! Consigo fazer Manicure & Pedicure Completa hoje por volta das 16:30 com a Carla Mendes?",
+                        timestamp = System.currentTimeMillis() - 45 * 60 * 1000,
+                        aiProcessed = true,
+                        detectedIntent = "NEW_APPOINTMENT",
+                        extractedClientName = "Carla Souza",
+                        extractedServiceName = "Manicure & Pedicure Completa",
+                        extractedServiceId = s3,
+                        extractedProfessionalName = "Carla Mendes",
+                        extractedProfessionalId = p2,
+                        extractedDate = today,
+                        extractedTime = "16:30",
+                        confidenceScore = 0.96f,
+                        customerSentiment = "POSITIVO",
+                        notes = "Cliente nova pelo WhatsApp.",
+                        suggestedReply = "Olá Carla! Tudo bem? Temos sim disponibilidade às 16:30 com a Carla Mendes. Confirmamos seu horário?",
+                        status = "PENDENTE"
+                    )
+                )
+
+                val inb3 = dao.insertInboundMessage(
+                    WhatsAppInboundMessageEntity(
+                        senderName = "Patrícia Gomes",
+                        senderPhone = "(11) 98877-6655",
+                        rawMessage = "Olá! Qual o valor da Limpeza de Pele Profunda e vocês têm horário no sábado de manhã?",
+                        timestamp = System.currentTimeMillis() - 2 * 3600 * 1000,
+                        aiProcessed = true,
+                        detectedIntent = "INQUIRY",
+                        extractedClientName = "Patrícia Gomes",
+                        extractedServiceName = "Limpeza de Pele Profunda",
+                        extractedServiceId = s5,
+                        extractedProfessionalName = "Daniela Rocha",
+                        extractedProfessionalId = p3,
+                        extractedDate = today,
+                        extractedTime = "09:00",
+                        confidenceScore = 0.91f,
+                        customerSentiment = "DUVIDA",
+                        notes = "Dúvida sobre valor e disponibilidade para Daniela Rocha.",
+                        suggestedReply = "Olá Patrícia! A Limpeza de Pele Profunda custa R$ 180,00 e dura 90min com a Daniela Rocha. Temos horário às 09:00 e 10:30 no sábado. Gostaria de reservar?",
+                        status = "PENDENTE"
+                    )
+                )
+
+                // Seed Professional Notifications
+                dao.insertProfessionalNotification(
+                    ProfessionalNotificationEntity(
+                        professionalId = p1,
+                        professionalName = "Beatriz Oliveira",
+                        professionalPhone = "(11) 91111-2222",
+                        title = "Novo Agendamento Solicitado via WhatsApp",
+                        message = "Mariana Silva solicitou Corte Feminino & Escova para hoje às 15:00 via WhatsApp.",
+                        timestamp = System.currentTimeMillis() - 14 * 60 * 1000,
+                        isRead = false,
+                        inboundMessageId = inb1,
+                        type = "NOVO_AGENDAMENTO",
+                        whatsappDispatched = false
+                    )
+                )
+
+                dao.insertProfessionalNotification(
+                    ProfessionalNotificationEntity(
+                        professionalId = p2,
+                        professionalName = "Carla Mendes",
+                        professionalPhone = "(11) 92222-3333",
+                        title = "Novo Agendamento Solicitado via WhatsApp",
+                        message = "Carla Souza solicitou Manicure & Pedicure Completa para hoje às 16:30 via WhatsApp.",
+                        timestamp = System.currentTimeMillis() - 44 * 60 * 1000,
+                        isRead = false,
+                        inboundMessageId = inb2,
+                        type = "NOVO_AGENDAMENTO",
+                        whatsappDispatched = false
+                    )
+                )
+
+                // Seed Waiting Queue
+                dao.insertWaitingQueue(WaitingQueueEntity(clientId = c1, clientName = "Mariana Silva", clientPhone = "(11) 98765-4321", serviceName = "Corte Feminino & Escova", professionalName = "Beatriz Oliveira", position = 1, status = "AGUARDANDO", estimatedWaitMinutes = 15))
+                dao.insertWaitingQueue(WaitingQueueEntity(clientId = c2, clientName = "Camila Rodrigues", clientPhone = "(11) 97654-3210", serviceName = "Manicure & Pedicure Completa", professionalName = "Carla Mendes", position = 2, status = "AGUARDANDO", estimatedWaitMinutes = 35))
+
+                // Seed Procedure History
+                dao.insertProcedureHistory(ProcedureHistoryEntity(clientId = c1, clientName = "Mariana Silva", serviceName = "Corte Feminino & Escova", professionalName = "Beatriz Oliveira", date = "2026-07-25", price = 120.00, notes = "Corte em camadas, cliente adorou."))
+                dao.insertProcedureHistory(ProcedureHistoryEntity(clientId = c3, clientName = "Juliana Souza", serviceName = "Coloração / Mechas Balayage", professionalName = "Beatriz Oliveira", date = "2026-06-10", price = 350.00, notes = "Loiro iluminado com raiz esfumada."))
+
+                // Seed VIP Subscriptions
+                dao.insertVipSubscription(VipSubscriptionEntity(clientId = c1, clientName = "Mariana Silva", clientPhone = "(11) 98765-4321", planName = "Plano Escova Ouro", monthlyFee = 149.00, status = "ATIVO", startDate = "2026-08-01", renewalDate = "2026-09-01", remainingBenefits = "2 escovas / mês, 1 hidratação"))
+                dao.insertVipSubscription(VipSubscriptionEntity(clientId = c3, clientName = "Juliana Souza", clientPhone = "(11) 96543-2109", planName = "Plano Premium Total", monthlyFee = 249.00, status = "ATIVO", startDate = "2026-08-05", renewalDate = "2026-09-05", remainingBenefits = "Corte ilimitado, 2 manicures"))
             }
         }
     }
-}
+

@@ -1,25 +1,44 @@
 package com.example.ui.screens.clients
 
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.PersonAdd
 import com.example.data.model.ClientEntity
 import com.example.ui.SalonViewModel
 import com.example.ui.components.MaskedOutlinedTextField
@@ -34,9 +53,19 @@ fun ClientsScreen(
     searchQuery: String,
     modifier: Modifier = Modifier
 ) {
+    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
     var selectedBirthMonth by remember { mutableStateOf<Int?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
     var clientToEdit by remember { mutableStateOf<ClientEntity?>(null) }
+
+    val handleCopyClient: (ClientEntity) -> Unit = { client ->
+        clipboardManager.setText(
+            AnnotatedString("Nome: ${client.name}\nCPF: ${client.cpf}\nTelefone: ${client.phone}\nE-mail: ${client.email}\nNascimento: ${client.birthDate}")
+        )
+        clientToEdit = client.copy(id = 0, name = "${client.name} (Cópia)")
+    }
 
     val filteredClients = remember(clients, searchQuery, selectedBirthMonth) {
         clients.filter { client ->
@@ -81,24 +110,34 @@ fun ClientsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Aniversariantes:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    Text("Aniversariantes:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
 
                     val months = listOf(
                         null to "Todos",
+                        1 to "Janeiro",
+                        2 to "Fevereiro",
+                        3 to "Março",
+                        4 to "Abril",
+                        5 to "Maio",
+                        6 to "Junho",
                         7 to "Julho",
                         8 to "Agosto",
-                        11 to "Novembro"
+                        9 to "Setembro",
+                        10 to "Outubro",
+                        11 to "Novembro",
+                        12 to "Dezembro"
                     )
 
                     months.forEach { (m, name) ->
                         FilterChip(
                             selected = selectedBirthMonth == m,
                             onClick = { selectedBirthMonth = m },
-                            label = { Text(name, fontSize = 12.sp) }
+                            label = { Text(name, fontSize = 12.sp, maxLines = 1, softWrap = false) }
                         )
                     }
                 }
@@ -110,28 +149,63 @@ fun ClientsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(32.dp),
+                        .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Outlined.People,
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.outline
+                    ElevatedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.elevatedCardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Nenhum cliente cadastrado",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Toque em + para adicionar novos clientes.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(24.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.People,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Nenhum cliente cadastrado",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "Comece adicionando seu primeiro cliente para gerenciar agendamentos.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    clientToEdit = null
+                                    showAddDialog = true
+                                },
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Cadastrar Cliente")
+                            }
+                        }
                     }
                 }
             } else {
@@ -146,8 +220,16 @@ fun ClientsScreen(
                         items(filteredClients, key = { it.id }) { client ->
                             ClientGridCard(
                                 client = client,
+                                onCopy = { handleCopyClient(client) },
                                 onEdit = { clientToEdit = client },
-                                onDelete = { viewModel.deleteClient(client) }
+                                onDelete = { viewModel.deleteClient(client) },
+                                onWhatsAppBirthday = {
+                                    viewModel.sendWhatsAppDirect(
+                                        context,
+                                        client.phone,
+                                        "Olá ${client.name}! 🎂 A equipe do Salão te deseja um Feliz Aniversário! Para comemorar, preparamos um cupom especial de 20% de desconto em qualquer serviço neste mês. Venha celebrar com a gente! ✨"
+                                    )
+                                }
                             )
                         }
                     }
@@ -160,8 +242,16 @@ fun ClientsScreen(
                         items(filteredClients, key = { it.id }) { client ->
                             ClientListItem(
                                 client = client,
+                                onCopy = { handleCopyClient(client) },
                                 onEdit = { clientToEdit = client },
-                                onDelete = { viewModel.deleteClient(client) }
+                                onDelete = { viewModel.deleteClient(client) },
+                                onWhatsAppBirthday = {
+                                    viewModel.sendWhatsAppDirect(
+                                        context,
+                                        client.phone,
+                                        "Olá ${client.name}! 🎂 A equipe do Salão te deseja um Feliz Aniversário! Para comemorar, preparamos um cupom especial de 20% de desconto em qualquer serviço neste mês. Venha celebrar com a gente! ✨"
+                                    )
+                                }
                             )
                         }
                     }
@@ -186,7 +276,11 @@ fun ClientsScreen(
             client = clientToEdit,
             onDismiss = { clientToEdit = null },
             onSave = { updated ->
-                viewModel.updateClient(updated)
+                if (updated.id == 0L) {
+                    viewModel.addClient(updated)
+                } else {
+                    viewModel.updateClient(updated)
+                }
                 clientToEdit = null
             }
         )
@@ -196,8 +290,10 @@ fun ClientsScreen(
 @Composable
 fun ClientListItem(
     client: ClientEntity,
+    onCopy: () -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onWhatsAppBirthday: () -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier
@@ -234,7 +330,21 @@ fun ClientListItem(
                 )
             }
 
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onWhatsAppBirthday) {
+                    Icon(
+                        Icons.Filled.Favorite,
+                        contentDescription = "Enviar Cupom de Aniversário via WhatsApp",
+                        tint = Color(0xFF2E7D32)
+                    )
+                }
+                IconButton(onClick = onCopy) {
+                    Icon(
+                        Icons.Outlined.ContentCopy,
+                        contentDescription = "Copiar Cliente",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
                 IconButton(onClick = onEdit) {
                     Icon(Icons.Outlined.Edit, contentDescription = "Editar")
                 }
@@ -249,8 +359,10 @@ fun ClientListItem(
 @Composable
 fun ClientGridCard(
     client: ClientEntity,
+    onCopy: () -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onWhatsAppBirthday: () -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier
@@ -292,8 +404,25 @@ fun ClientGridCard(
 
             Row(
                 horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                IconButton(onClick = onWhatsAppBirthday, modifier = Modifier.size(28.dp)) {
+                    Icon(
+                        Icons.Filled.Favorite,
+                        contentDescription = "Cupom Aniversário",
+                        tint = Color(0xFF2E7D32),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                IconButton(onClick = onCopy, modifier = Modifier.size(28.dp)) {
+                    Icon(
+                        Icons.Outlined.ContentCopy,
+                        contentDescription = "Copiar Cliente",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
                 IconButton(onClick = onEdit, modifier = Modifier.size(28.dp)) {
                     Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
                 }
@@ -304,7 +433,8 @@ fun ClientGridCard(
         }
     }
 }
-
+ 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientFormDialog(
     client: ClientEntity?,
@@ -317,72 +447,105 @@ fun ClientFormDialog(
     var email by remember { mutableStateOf(client?.email ?: "") }
     var birthDate by remember { mutableStateOf(client?.birthDate ?: "1995-05-15") }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (client == null) "Novo Cliente" else "Editar Cliente") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nome Completo *") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                MaskedOutlinedTextField(
-                    value = cpf,
-                    onValueChange = { cpf = it },
-                    label = "CPF",
-                    maskType = "CPF",
-                    isRequired = true
-                )
-
-                MaskedOutlinedTextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    label = "Telefone com WhatsApp",
-                    maskType = "PHONE",
-                    isRequired = true
-                )
-
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("E-mail") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = birthDate,
-                    onValueChange = { birthDate = it },
-                    label = { Text("Data de Nascimento (YYYY-MM-DD)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val newC = ClientEntity(
-                        id = client?.id ?: 0,
-                        name = name,
-                        cpf = cpf,
-                        phone = phone,
-                        email = email,
-                        birthDate = birthDate
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                if (client == null) "Novo Cliente" else "Editar Cliente",
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = onDismiss) {
+                                Icon(Icons.Default.Close, contentDescription = "Fechar")
+                            }
+                        },
+                        actions = {
+                            Button(
+                                onClick = {
+                                    val newC = ClientEntity(
+                                        id = client?.id ?: 0,
+                                        name = name,
+                                        cpf = cpf,
+                                        phone = phone,
+                                        email = email,
+                                        birthDate = birthDate
+                                    )
+                                    onSave(newC)
+                                },
+                                enabled = name.isNotBlank() && phone.isNotBlank(),
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .testTag("save_client_button")
+                            ) {
+                                Text("Salvar")
+                            }
+                        }
                     )
-                    onSave(newC)
-                },
-                enabled = name.isNotBlank() && phone.isNotBlank(),
-                modifier = Modifier.testTag("save_client_button")
-            ) {
-                Text("Salvar Cliente")
-            }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
-                Text("Cancelar")
+                }
+            ) { padding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(20.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "Informações do Cliente",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text("Nome Completo *") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    MaskedOutlinedTextField(
+                        value = cpf,
+                        onValueChange = { cpf = it },
+                        label = "CPF",
+                        maskType = "CPF",
+                        isRequired = true
+                    )
+
+                    MaskedOutlinedTextField(
+                        value = phone,
+                        onValueChange = { phone = it },
+                        label = "Telefone com WhatsApp",
+                        maskType = "PHONE",
+                        isRequired = true
+                    )
+
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("E-mail") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = birthDate,
+                        onValueChange = { birthDate = it },
+                        label = { Text("Data de Nascimento (YYYY-MM-DD)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
-    )
+    }
 }

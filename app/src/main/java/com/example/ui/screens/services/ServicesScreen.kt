@@ -2,16 +2,20 @@ package com.example.ui.screens.services
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
@@ -28,6 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.NfseEntity
 import com.example.data.model.ProfessionalEntity
 import com.example.data.model.ServiceEntity
@@ -103,16 +109,17 @@ fun ServicesScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Categoria:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    Text("Categoria:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
                     categories.take(4).forEach { cat ->
                         FilterChip(
                             selected = (selectedCategoryFilter == cat) || (cat == "Todas" && selectedCategoryFilter == null),
                             onClick = { selectedCategoryFilter = if (cat == "Todas") null else cat },
-                            label = { Text(cat, fontSize = 12.sp) }
+                            label = { Text(cat, fontSize = 12.sp, maxLines = 1, softWrap = false) }
                         )
                     }
                 }
@@ -440,6 +447,7 @@ fun ServiceGridCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ServiceFormDialog(
     service: ServiceEntity?,
@@ -454,81 +462,114 @@ fun ServiceFormDialog(
     var category by remember { mutableStateOf(service?.category ?: "Cabelo") }
     var taxCode by remember { mutableStateOf(service?.taxCode ?: "06.01") }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (service == null) "Novo Serviço" else "Editar Serviço") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nome do Serviço *") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Descrição Detalhada") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = price,
-                        onValueChange = { price = it },
-                        label = { Text("Valor (R$) *") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
-                    )
-                    OutlinedTextField(
-                        value = duration,
-                        onValueChange = { duration = it },
-                        label = { Text("Duração (min) *") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                if (service == null) "Novo Serviço" else "Editar Serviço",
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = onDismiss) {
+                                Icon(Icons.Default.Close, contentDescription = "Fechar")
+                            }
+                        },
+                        actions = {
+                            Button(
+                                onClick = {
+                                    val newServ = ServiceEntity(
+                                        id = service?.id ?: 0,
+                                        name = name,
+                                        description = description,
+                                        price = price.toDoubleOrNull() ?: 100.0,
+                                        durationMinutes = duration.toIntOrNull() ?: 60,
+                                        category = category,
+                                        taxCode = taxCode
+                                    )
+                                    onSave(newServ)
+                                },
+                                enabled = name.isNotBlank() && price.isNotBlank(),
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .testTag("save_service_button")
+                            ) {
+                                Text("Salvar")
+                            }
+                        }
                     )
                 }
-
-                OutlinedTextField(
-                    value = category,
-                    onValueChange = { category = it },
-                    label = { Text("Categoria (Cabelo, Unhas, Estética...)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = taxCode,
-                    onValueChange = { taxCode = it },
-                    label = { Text("Código LC 116 / Tributação NFS-e") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val newServ = ServiceEntity(
-                        id = service?.id ?: 0,
-                        name = name,
-                        description = description,
-                        price = price.toDoubleOrNull() ?: 100.0,
-                        durationMinutes = duration.toIntOrNull() ?: 60,
-                        category = category,
-                        taxCode = taxCode
+            ) { padding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(20.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "Informações do Serviço",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
                     )
-                    onSave(newServ)
-                },
-                enabled = name.isNotBlank() && price.isNotBlank(),
-                modifier = Modifier.testTag("save_service_button")
-            ) {
-                Text("Salvar Serviço")
-            }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
-                Text("Cancelar")
+
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text("Nome do Serviço *") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text("Descrição Detalhada") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = price,
+                            onValueChange = { price = it },
+                            label = { Text("Valor (R$) *") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = duration,
+                            onValueChange = { duration = it },
+                            label = { Text("Duração (min) *") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    OutlinedTextField(
+                        value = category,
+                        onValueChange = { category = it },
+                        label = { Text("Categoria (Cabelo, Unhas, Estética...)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = taxCode,
+                        onValueChange = { taxCode = it },
+                        label = { Text("Código LC 116 / Tributação NFS-e") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
-    )
+    }
 }

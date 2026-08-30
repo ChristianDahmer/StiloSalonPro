@@ -45,7 +45,9 @@ class SalonRepository(private val dao: SalonDao) {
     // WhatsApp
     val whatsappTemplatesFlow: Flow<List<WhatsAppTemplateEntity>> = dao.getAllWhatsAppTemplatesFlow()
     val whatsappLogsFlow: Flow<List<WhatsAppLogEntity>> = dao.getAllWhatsAppLogsFlow()
+    suspend fun insertWhatsAppTemplate(template: WhatsAppTemplateEntity): Long = dao.insertWhatsAppTemplate(template)
     suspend fun updateWhatsAppTemplate(template: WhatsAppTemplateEntity) = dao.updateWhatsAppTemplate(template)
+    suspend fun deleteWhatsAppTemplate(template: WhatsAppTemplateEntity) = dao.deleteWhatsAppTemplate(template)
     suspend fun insertWhatsAppLog(log: WhatsAppLogEntity): Long = dao.insertWhatsAppLog(log)
 
     // Financial Transactions
@@ -53,4 +55,41 @@ class SalonRepository(private val dao: SalonDao) {
     suspend fun insertFinancialTransaction(transaction: FinancialTransactionEntity): Long = dao.insertFinancialTransaction(transaction)
     suspend fun updateFinancialTransaction(transaction: FinancialTransactionEntity) = dao.updateFinancialTransaction(transaction)
     suspend fun deleteFinancialTransaction(transaction: FinancialTransactionEntity) = dao.deleteFinancialTransaction(transaction)
+
+    // WhatsApp Inbound (AI Monitor)
+    val inboundMessagesFlow: Flow<List<WhatsAppInboundMessageEntity>> = dao.getAllInboundMessagesFlow()
+    suspend fun insertInboundMessage(message: WhatsAppInboundMessageEntity): Long = dao.insertInboundMessage(message)
+    suspend fun updateInboundMessage(message: WhatsAppInboundMessageEntity) = dao.updateInboundMessage(message)
+    suspend fun deleteInboundMessage(message: WhatsAppInboundMessageEntity) = dao.deleteInboundMessage(message)
+
+    // Professional Notifications
+    val professionalNotificationsFlow: Flow<List<ProfessionalNotificationEntity>> = dao.getAllProfessionalNotificationsFlow()
+    suspend fun insertProfessionalNotification(notification: ProfessionalNotificationEntity): Long = dao.insertProfessionalNotification(notification)
+    suspend fun updateProfessionalNotification(notification: ProfessionalNotificationEntity) = dao.updateProfessionalNotification(notification)
+    suspend fun markNotificationAsRead(id: Long) = dao.markNotificationAsRead(id)
+    suspend fun markAllNotificationsAsRead() = dao.markAllNotificationsAsRead()
+    suspend fun deleteProfessionalNotification(notification: ProfessionalNotificationEntity) = dao.deleteProfessionalNotification(notification)
+
+    // AI Monitoring Config
+    val aiMonitoringConfigFlow: Flow<AiMonitoringConfigEntity?> = dao.getAiMonitoringConfigFlow()
+    suspend fun saveAiMonitoringConfig(config: AiMonitoringConfigEntity) = dao.insertOrUpdateAiMonitoringConfig(config)
+
+    // Waiting Queue
+    val waitingQueueFlow: Flow<List<WaitingQueueEntity>> = dao.getAllWaitingQueueFlow()
+    suspend fun insertWaitingQueue(item: WaitingQueueEntity): Long = dao.insertWaitingQueue(item)
+    suspend fun updateWaitingQueue(item: WaitingQueueEntity) = dao.updateWaitingQueue(item)
+    suspend fun deleteWaitingQueue(item: WaitingQueueEntity) = dao.deleteWaitingQueue(item)
+
+    // Procedure History
+    val procedureHistoryFlow: Flow<List<ProcedureHistoryEntity>> = dao.getAllProcedureHistoryFlow()
+    fun getProcedureHistoryForClient(clientId: Long): Flow<List<ProcedureHistoryEntity>> = dao.getProcedureHistoryForClientFlow(clientId)
+    suspend fun insertProcedureHistory(history: ProcedureHistoryEntity): Long = dao.insertProcedureHistory(history)
+    suspend fun deleteProcedureHistory(history: ProcedureHistoryEntity) = dao.deleteProcedureHistory(history)
+
+    // VIP Subscriptions
+    val vipSubscriptionsFlow: Flow<List<VipSubscriptionEntity>> = dao.getAllVipSubscriptionsFlow()
+    suspend fun insertVipSubscription(sub: VipSubscriptionEntity): Long = dao.insertVipSubscription(sub)
+    suspend fun updateVipSubscription(sub: VipSubscriptionEntity) = dao.updateVipSubscription(sub)
+    suspend fun deleteVipSubscription(sub: VipSubscriptionEntity) = dao.deleteVipSubscription(sub)
 }
+

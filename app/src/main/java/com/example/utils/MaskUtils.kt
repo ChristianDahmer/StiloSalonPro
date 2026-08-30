@@ -118,138 +118,257 @@ object MaskUtils {
 
 class CpfVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
-        val digits = text.text.filter { it.isDigit() }.take(11)
-        val sb = StringBuilder()
-        for (i in digits.indices) {
-            sb.append(digits[i])
-            if (i == 2 || i == 5) sb.append(".")
-            else if (i == 8) sb.append("-")
+        val raw = text.text
+        val rawToDigitIndex = IntArray(raw.length + 1)
+        val digitsSb = StringBuilder()
+
+        for (i in raw.indices) {
+            rawToDigitIndex[i] = digitsSb.length
+            if (raw[i].isDigit() && digitsSb.length < 11) {
+                digitsSb.append(raw[i])
+            }
         }
-        val transformed = sb.toString()
+        rawToDigitIndex[raw.length] = digitsSb.length
+
+        val digits = digitsSb.toString()
+        val transformedSb = StringBuilder()
+        val digitToTrans = IntArray(digits.length + 1)
+        val transToDigit = ArrayList<Int>()
+
+        for (i in digits.indices) {
+            digitToTrans[i] = transformedSb.length
+            transformedSb.append(digits[i])
+            transToDigit.add(i)
+
+            if (i == 2 || i == 5) {
+                if (i < digits.length - 1) {
+                    transformedSb.append('.')
+                    transToDigit.add(i + 1)
+                }
+            } else if (i == 8) {
+                if (i < digits.length - 1) {
+                    transformedSb.append('-')
+                    transToDigit.add(i + 1)
+                }
+            }
+        }
+        digitToTrans[digits.length] = transformedSb.length
+        transToDigit.add(digits.length)
+
+        val transformed = transformedSb.toString()
 
         val offsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
-                val clamped = offset.coerceAtMost(digits.length)
-                return when {
-                    clamped <= 2 -> clamped
-                    clamped <= 5 -> clamped + 1
-                    clamped <= 8 -> clamped + 2
-                    else -> (clamped + 3).coerceAtMost(transformed.length)
-                }
+                val clampedRaw = offset.coerceIn(0, raw.length)
+                val digitIdx = rawToDigitIndex[clampedRaw]
+                return digitToTrans[digitIdx].coerceIn(0, transformed.length)
             }
 
             override fun transformedToOriginal(offset: Int): Int {
-                val clamped = offset.coerceAtMost(transformed.length)
-                return when {
-                    clamped <= 3 -> clamped
-                    clamped <= 7 -> clamped - 1
-                    clamped <= 11 -> clamped - 2
-                    else -> (clamped - 3).coerceAtMost(digits.length)
+                val clampedTrans = offset.coerceIn(0, transformed.length)
+                val digitIdx = transToDigit[clampedTrans]
+                var rawIdx = 0
+                while (rawIdx < raw.length && rawToDigitIndex[rawIdx] < digitIdx) {
+                    rawIdx++
                 }
+                return rawIdx.coerceIn(0, raw.length)
             }
         }
+
         return TransformedText(AnnotatedString(transformed), offsetMapping)
     }
 }
 
 class CnpjVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
-        val digits = text.text.filter { it.isDigit() }.take(14)
-        val sb = StringBuilder()
-        for (i in digits.indices) {
-            sb.append(digits[i])
-            if (i == 1 || i == 4) sb.append(".")
-            else if (i == 7) sb.append("/")
-            else if (i == 11) sb.append("-")
+        val raw = text.text
+        val rawToDigitIndex = IntArray(raw.length + 1)
+        val digitsSb = StringBuilder()
+
+        for (i in raw.indices) {
+            rawToDigitIndex[i] = digitsSb.length
+            if (raw[i].isDigit() && digitsSb.length < 14) {
+                digitsSb.append(raw[i])
+            }
         }
-        val transformed = sb.toString()
+        rawToDigitIndex[raw.length] = digitsSb.length
+
+        val digits = digitsSb.toString()
+        val transformedSb = StringBuilder()
+        val digitToTrans = IntArray(digits.length + 1)
+        val transToDigit = ArrayList<Int>()
+
+        for (i in digits.indices) {
+            digitToTrans[i] = transformedSb.length
+            transformedSb.append(digits[i])
+            transToDigit.add(i)
+
+            if (i == 1 || i == 4) {
+                if (i < digits.length - 1) {
+                    transformedSb.append('.')
+                    transToDigit.add(i + 1)
+                }
+            } else if (i == 7) {
+                if (i < digits.length - 1) {
+                    transformedSb.append('/')
+                    transToDigit.add(i + 1)
+                }
+            } else if (i == 11) {
+                if (i < digits.length - 1) {
+                    transformedSb.append('-')
+                    transToDigit.add(i + 1)
+                }
+            }
+        }
+        digitToTrans[digits.length] = transformedSb.length
+        transToDigit.add(digits.length)
+
+        val transformed = transformedSb.toString()
 
         val offsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
-                val clamped = offset.coerceAtMost(digits.length)
-                return when {
-                    clamped <= 2 -> clamped
-                    clamped <= 5 -> clamped + 1
-                    clamped <= 8 -> clamped + 2
-                    clamped <= 12 -> clamped + 3
-                    else -> (clamped + 4).coerceAtMost(transformed.length)
-                }
+                val clampedRaw = offset.coerceIn(0, raw.length)
+                val digitIdx = rawToDigitIndex[clampedRaw]
+                return digitToTrans[digitIdx].coerceIn(0, transformed.length)
             }
 
             override fun transformedToOriginal(offset: Int): Int {
-                val clamped = offset.coerceAtMost(transformed.length)
-                return when {
-                    clamped <= 2 -> clamped
-                    clamped <= 6 -> clamped - 1
-                    clamped <= 10 -> clamped - 2
-                    clamped <= 15 -> clamped - 3
-                    else -> (clamped - 4).coerceAtMost(digits.length)
+                val clampedTrans = offset.coerceIn(0, transformed.length)
+                val digitIdx = transToDigit[clampedTrans]
+                var rawIdx = 0
+                while (rawIdx < raw.length && rawToDigitIndex[rawIdx] < digitIdx) {
+                    rawIdx++
                 }
+                return rawIdx.coerceIn(0, raw.length)
             }
         }
+
         return TransformedText(AnnotatedString(transformed), offsetMapping)
     }
 }
 
 class PhoneVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
-        val digits = text.text.filter { it.isDigit() }.take(11)
-        val sb = StringBuilder()
-        if (digits.isNotEmpty()) sb.append("(")
-        for (i in digits.indices) {
-            sb.append(digits[i])
-            if (i == 1) sb.append(") ")
-            else if (digits.length == 11 && i == 6) sb.append("-")
-            else if (digits.length <= 10 && i == 5) sb.append("-")
+        val raw = text.text
+        val rawToDigitIndex = IntArray(raw.length + 1)
+        val digitsSb = StringBuilder()
+
+        for (i in raw.indices) {
+            rawToDigitIndex[i] = digitsSb.length
+            if (raw[i].isDigit() && digitsSb.length < 11) {
+                digitsSb.append(raw[i])
+            }
         }
-        val transformed = sb.toString()
+        rawToDigitIndex[raw.length] = digitsSb.length
+
+        val digits = digitsSb.toString()
+        val transformedSb = StringBuilder()
+        val digitToTrans = IntArray(digits.length + 1)
+        val transToDigit = ArrayList<Int>()
+
+        if (digits.isNotEmpty()) {
+            transformedSb.append('(')
+            transToDigit.add(0)
+        }
+
+        for (i in digits.indices) {
+            digitToTrans[i] = transformedSb.length
+            transformedSb.append(digits[i])
+            transToDigit.add(i)
+
+            if (i == 1) {
+                transformedSb.append(") ")
+                transToDigit.add(i + 1)
+                transToDigit.add(i + 1)
+            } else if (digits.length == 11 && i == 6) {
+                transformedSb.append('-')
+                transToDigit.add(i + 1)
+            } else if (digits.length <= 10 && i == 5) {
+                transformedSb.append('-')
+                transToDigit.add(i + 1)
+            }
+        }
+        digitToTrans[digits.length] = transformedSb.length
+        transToDigit.add(digits.length)
+
+        val transformed = transformedSb.toString()
 
         val offsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
-                val clamped = offset.coerceAtMost(digits.length)
-                return when {
-                    clamped == 0 -> 0
-                    clamped <= 2 -> clamped + 1
-                    clamped <= 6 -> clamped + 3
-                    else -> (clamped + 4).coerceAtMost(transformed.length)
-                }
+                val clampedRaw = offset.coerceIn(0, raw.length)
+                val digitIdx = rawToDigitIndex[clampedRaw]
+                return digitToTrans[digitIdx].coerceIn(0, transformed.length)
             }
 
             override fun transformedToOriginal(offset: Int): Int {
-                val clamped = offset.coerceAtMost(transformed.length)
-                return when {
-                    clamped <= 1 -> 0
-                    clamped <= 4 -> clamped - 1
-                    clamped <= 9 -> (clamped - 3).coerceAtLeast(0)
-                    else -> (clamped - 4).coerceAtMost(digits.length)
+                val clampedTrans = offset.coerceIn(0, transformed.length)
+                val digitIdx = transToDigit[clampedTrans]
+                var rawIdx = 0
+                while (rawIdx < raw.length && rawToDigitIndex[rawIdx] < digitIdx) {
+                    rawIdx++
                 }
+                return rawIdx.coerceIn(0, raw.length)
             }
         }
+
         return TransformedText(AnnotatedString(transformed), offsetMapping)
     }
 }
 
 class CepVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
-        val digits = text.text.filter { it.isDigit() }.take(8)
-        val sb = StringBuilder()
-        for (i in digits.indices) {
-            sb.append(digits[i])
-            if (i == 4) sb.append("-")
+        val raw = text.text
+        val rawToDigitIndex = IntArray(raw.length + 1)
+        val digitsSb = StringBuilder()
+
+        for (i in raw.indices) {
+            rawToDigitIndex[i] = digitsSb.length
+            if (raw[i].isDigit() && digitsSb.length < 8) {
+                digitsSb.append(raw[i])
+            }
         }
-        val transformed = sb.toString()
+        rawToDigitIndex[raw.length] = digitsSb.length
+
+        val digits = digitsSb.toString()
+        val transformedSb = StringBuilder()
+        val digitToTrans = IntArray(digits.length + 1)
+        val transToDigit = ArrayList<Int>()
+
+        for (i in digits.indices) {
+            digitToTrans[i] = transformedSb.length
+            transformedSb.append(digits[i])
+            transToDigit.add(i)
+
+            if (i == 4) {
+                if (i < digits.length - 1) {
+                    transformedSb.append('-')
+                    transToDigit.add(i + 1)
+                }
+            }
+        }
+        digitToTrans[digits.length] = transformedSb.length
+        transToDigit.add(digits.length)
+
+        val transformed = transformedSb.toString()
 
         val offsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
-                val clamped = offset.coerceAtMost(digits.length)
-                return if (clamped <= 5) clamped else (clamped + 1).coerceAtMost(transformed.length)
+                val clampedRaw = offset.coerceIn(0, raw.length)
+                val digitIdx = rawToDigitIndex[clampedRaw]
+                return digitToTrans[digitIdx].coerceIn(0, transformed.length)
             }
 
             override fun transformedToOriginal(offset: Int): Int {
-                val clamped = offset.coerceAtMost(transformed.length)
-                return if (clamped <= 5) clamped else (clamped - 1).coerceAtMost(digits.length)
+                val clampedTrans = offset.coerceIn(0, transformed.length)
+                val digitIdx = transToDigit[clampedTrans]
+                var rawIdx = 0
+                while (rawIdx < raw.length && rawToDigitIndex[rawIdx] < digitIdx) {
+                    rawIdx++
+                }
+                return rawIdx.coerceIn(0, raw.length)
             }
         }
+
         return TransformedText(AnnotatedString(transformed), offsetMapping)
     }
 }

@@ -7,9 +7,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +23,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.ProfessionalEntity
 import com.example.ui.SalonViewModel
 import com.example.ui.components.MaskedOutlinedTextField
@@ -284,6 +289,7 @@ fun ProfessionalGridCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfessionalFormDialog(
     professional: ProfessionalEntity?,
@@ -298,88 +304,121 @@ fun ProfessionalFormDialog(
     var startHour by remember { mutableStateOf(professional?.startHour ?: "08:00") }
     var endHour by remember { mutableStateOf(professional?.endHour ?: "18:00") }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (professional == null) "Novo Profissional" else "Editar Profissional") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nome Completo *") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = specialty,
-                    onValueChange = { specialty = it },
-                    label = { Text("Especialidade *") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                MaskedOutlinedTextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    label = "Telefone",
-                    maskType = "PHONE",
-                    isRequired = true
-                )
-
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("E-mail Profissional") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = workDays,
-                    onValueChange = { workDays = it },
-                    label = { Text("Dias de Atendimento") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        value = startHour,
-                        onValueChange = { startHour = it },
-                        label = { Text("Início (HH:mm)") },
-                        modifier = Modifier.weight(1f)
-                    )
-                    OutlinedTextField(
-                        value = endHour,
-                        onValueChange = { endHour = it },
-                        label = { Text("Fim (HH:mm)") },
-                        modifier = Modifier.weight(1f)
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                if (professional == null) "Novo Profissional" else "Editar Profissional",
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = onDismiss) {
+                                Icon(Icons.Default.Close, contentDescription = "Fechar")
+                            }
+                        },
+                        actions = {
+                            Button(
+                                onClick = {
+                                    val newProf = ProfessionalEntity(
+                                        id = professional?.id ?: 0,
+                                        name = name,
+                                        specialty = specialty,
+                                        phone = phone,
+                                        email = email,
+                                        workDays = workDays,
+                                        startHour = startHour,
+                                        endHour = endHour
+                                    )
+                                    onSave(newProf)
+                                },
+                                enabled = name.isNotBlank() && specialty.isNotBlank(),
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .testTag("save_professional_button")
+                            ) {
+                                Text("Salvar")
+                            }
+                        }
                     )
                 }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val newProf = ProfessionalEntity(
-                        id = professional?.id ?: 0,
-                        name = name,
-                        specialty = specialty,
-                        phone = phone,
-                        email = email,
-                        workDays = workDays,
-                        startHour = startHour,
-                        endHour = endHour
+            ) { padding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(20.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "Informações do Colaborador",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
                     )
-                    onSave(newProf)
-                },
-                enabled = name.isNotBlank() && specialty.isNotBlank(),
-                modifier = Modifier.testTag("save_professional_button")
-            ) {
-                Text("Salvar Colaborador")
-            }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
-                Text("Cancelar")
+
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text("Nome Completo *") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = specialty,
+                        onValueChange = { specialty = it },
+                        label = { Text("Especialidade *") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    MaskedOutlinedTextField(
+                        value = phone,
+                        onValueChange = { phone = it },
+                        label = "Telefone",
+                        maskType = "PHONE",
+                        isRequired = true
+                    )
+
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("E-mail Profissional") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = workDays,
+                        onValueChange = { workDays = it },
+                        label = { Text("Dias de Atendimento") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = startHour,
+                            onValueChange = { startHour = it },
+                            label = { Text("Início (HH:mm)") },
+                            modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = endHour,
+                            onValueChange = { endHour = it },
+                            label = { Text("Fim (HH:mm)") },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
             }
         }
-    )
+    }
 }

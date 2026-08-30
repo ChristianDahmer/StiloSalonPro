@@ -1,10 +1,16 @@
 package com.example
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.core.content.ContextCompat
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -15,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.SalonViewModel
@@ -57,12 +64,28 @@ class MainActivity : ComponentActivity() {
 
             var currentNavTab by remember { mutableStateOf(settings.defaultStartScreen) }
             var showMenuDropdown by remember { mutableStateOf(false) }
-            var showQuickThemeDialog by remember { mutableStateOf(false) }
 
             // Sync initial default screen once loaded
             LaunchedEffect(settings.defaultStartScreen) {
                 if (currentNavTab.isEmpty()) {
                     currentNavTab = settings.defaultStartScreen
+                }
+            }
+
+            // Notification permission request for Android 13+
+            val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) { /* ignore or handle */ }
+
+            LaunchedEffect(Unit) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val hasPermission = ContextCompat.checkSelfPermission(
+                        this@MainActivity,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                    if (!hasPermission) {
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
                 }
             }
 
@@ -95,8 +118,7 @@ class MainActivity : ComponentActivity() {
                             searchQuery = searchQuery,
                             onSearchQueryChange = { viewModel.setSearchQuery(it) },
                             onOpenSettings = { currentNavTab = "CONFIGURANCOES" },
-                            onOpenWhatsApp = { currentNavTab = "WHATSAPP" },
-                            onOpenThemeSelector = { showQuickThemeDialog = true }
+                            onOpenWhatsApp = { currentNavTab = "WHATSAPP" }
                         )
                     },
                     bottomBar = {
@@ -114,7 +136,8 @@ class MainActivity : ComponentActivity() {
                                         contentDescription = "Agendamentos"
                                     )
                                 },
-                                label = { Text("Agenda") },
+                                label = { Text("Agenda", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
+                                alwaysShowLabel = true,
                                 modifier = Modifier.testTag("nav_item_agendamentos")
                             )
 
@@ -127,7 +150,8 @@ class MainActivity : ComponentActivity() {
                                         contentDescription = "Clientes"
                                     )
                                 },
-                                label = { Text("Clientes") },
+                                label = { Text("Clientes", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
+                                alwaysShowLabel = true,
                                 modifier = Modifier.testTag("nav_item_clientes")
                             )
 
@@ -140,7 +164,8 @@ class MainActivity : ComponentActivity() {
                                         contentDescription = "Financeiro"
                                     )
                                 },
-                                label = { Text("Financeiro") },
+                                label = { Text("Financeiro", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
+                                alwaysShowLabel = true,
                                 modifier = Modifier.testTag("nav_item_financeiro")
                             )
 
@@ -152,10 +177,11 @@ class MainActivity : ComponentActivity() {
                                         painter = painterResource(id = R.drawable.ic_whatsapp),
                                         contentDescription = "WhatsApp",
                                         tint = Color.Unspecified,
-                                        modifier = Modifier.size(24.dp)
+                                        modifier = Modifier.size(22.dp)
                                     )
                                 },
-                                label = { Text("WhatsApp") },
+                                label = { Text("WhatsApp", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
+                                alwaysShowLabel = true,
                                 modifier = Modifier.testTag("nav_item_whatsapp")
                             )
 
@@ -168,7 +194,8 @@ class MainActivity : ComponentActivity() {
                                         contentDescription = "NFS-e"
                                     )
                                 },
-                                label = { Text("NFS-e") },
+                                label = { Text("NFS-e", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
+                                alwaysShowLabel = true,
                                 modifier = Modifier.testTag("nav_item_nfse")
                             )
 
@@ -259,7 +286,8 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                 },
-                                label = { Text("Mais") },
+                                label = { Text("Mais", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
+                                alwaysShowLabel = true,
                                 modifier = Modifier.testTag("nav_item_mais")
                             )
                         }
@@ -336,6 +364,18 @@ class MainActivity : ComponentActivity() {
                                 viewModel = viewModel,
                                 settings = settings
                             )
+
+                            else -> AppointmentsScreen(
+                                viewModel = viewModel,
+                                appointments = appointments,
+                                clients = clients,
+                                services = services,
+                                professionals = professionals,
+                                nfseList = nfseList,
+                                masterPassword = settings.masterPassword,
+                                isGridView = isGridView,
+                                searchQuery = searchQuery
+                            )
                         }
                     }
                 }
@@ -347,18 +387,6 @@ class MainActivity : ComponentActivity() {
                         message = confirmationDialogText!!,
                         onConfirm = { viewModel.confirmAction() },
                         onDismiss = { viewModel.dismissConfirmation() }
-                    )
-                }
-
-                // Quick Theme Picker Dialog
-                if (showQuickThemeDialog) {
-                    com.example.ui.components.QuickThemePickerDialog(
-                        currentPalette = settings.themePalette,
-                        currentDarkMode = settings.darkModeOption,
-                        onDismiss = { showQuickThemeDialog = false },
-                        onSelectTheme = { selectedPalette, selectedDarkMode ->
-                            viewModel.saveSettings(settings.copy(themePalette = selectedPalette, darkModeOption = selectedDarkMode))
-                        }
                     )
                 }
             }

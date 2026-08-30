@@ -3,6 +3,7 @@ package com.example.ui.screens.finance
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -13,9 +14,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -27,12 +31,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.FinancialTransactionEntity
 import com.example.ui.SalonViewModel
 import com.example.utils.MaskUtils
@@ -52,6 +61,7 @@ fun FinanceScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
 
     var selectedTransactionToEdit by remember { mutableStateOf<FinancialTransactionEntity?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -143,17 +153,17 @@ fun FinanceScreen(
 
     Scaffold(
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            FloatingActionButton(
                 onClick = {
                     initialDialogType = "RECEITA"
                     showAddDialog = true
                 },
-                icon = { Icon(Icons.Default.Add, contentDescription = "Lançar Caixa") },
-                text = { Text("Novo Lançamento") },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.testTag("fab_add_finance")
-            )
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Novo Lançamento")
+            }
         },
         modifier = modifier.fillMaxSize()
     ) { innerPadding ->
@@ -186,7 +196,9 @@ fun FinanceScreen(
             ) {
                 // Period Filters
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -194,7 +206,9 @@ fun FinanceScreen(
                         text = "Período:",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        softWrap = false
                     )
                     listOf(
                         "ESTE_MES" to "Este Mês",
@@ -205,7 +219,7 @@ fun FinanceScreen(
                         FilterChip(
                             selected = periodFilter == key,
                             onClick = { viewModel.setSelectedFinancePeriodFilter(key) },
-                            label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                            label = { Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false) },
                             modifier = Modifier.testTag("filter_period_$key")
                         )
                     }
@@ -213,7 +227,9 @@ fun FinanceScreen(
 
                 // Type Filters
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -221,7 +237,9 @@ fun FinanceScreen(
                         text = "Tipo:",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        softWrap = false
                     )
                     listOf(
                         "TODAS" to "Todas",
@@ -232,7 +250,7 @@ fun FinanceScreen(
                         FilterChip(
                             selected = (typeFilter ?: "TODAS") == key,
                             onClick = { viewModel.setSelectedFinanceTypeFilter(if (key == "TODAS") null else key) },
-                            label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                            label = { Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false) },
                             leadingIcon = {
                                 when (key) {
                                     "RECEITA" -> Icon(Icons.Default.TrendingUp, contentDescription = null, tint = Color(0xFF2E7D32), modifier = Modifier.size(16.dp))
@@ -247,59 +265,73 @@ fun FinanceScreen(
                 }
             }
 
-            // Quick Action Buttons Bar
-            Row(
+            // Quick Action Buttons Bar (Organized in 2 rows to ensure horizontal text without vertical wrapping)
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Button(
-                    onClick = {
-                        initialDialogType = "RECEITA"
-                        showAddDialog = true
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Receita", fontSize = 12.sp)
+                    Button(
+                        onClick = {
+                            initialDialogType = "RECEITA"
+                            showAddDialog = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Nova Receita", fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
+                    }
+
+                    Button(
+                        onClick = {
+                            initialDialogType = "DESPESA"
+                            showAddDialog = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(Icons.Default.RemoveCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Nova Despesa", fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
+                    }
                 }
 
-                Button(
-                    onClick = {
-                        initialDialogType = "DESPESA"
-                        showAddDialog = true
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(Icons.Default.RemoveCircle, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Despesa", fontSize = 12.sp)
-                }
+                    OutlinedButton(
+                        onClick = { viewModel.syncAppointmentsToFinancial(context) },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Sinc. Agenda", fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1, softWrap = false)
+                    }
 
-                OutlinedButton(
-                    onClick = { viewModel.syncAppointmentsToFinancial(context) },
-                    modifier = Modifier.weight(1.1f),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)
-                ) {
-                    Icon(Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Sinc. Agenda", fontSize = 12.sp)
-                }
-
-                FilledTonalButton(
-                    onClick = { showDreReportDialog = true },
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)
-                ) {
-                    Icon(Icons.Default.Assessment, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Relatório", fontSize = 12.sp)
+                    FilledTonalButton(
+                        onClick = { showDreReportDialog = true },
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(Icons.Default.Assessment, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Relatório DRE", fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1, softWrap = false)
+                    }
                 }
             }
 
@@ -308,32 +340,65 @@ fun FinanceScreen(
             // Main List or Grid Content
             if (filteredTransactions.isEmpty()) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(32.dp)
+                    ElevatedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.elevatedCardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        )
                     ) {
-                        Icon(
-                            imageVector = Icons.Outlined.AccountBalanceWallet,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                            modifier = Modifier.size(64.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Nenhum lançamento financeiro encontrado",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Ajuste os filtros ou clique em 'Novo Lançamento' para registrar receitas e despesas no caixa.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(24.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.AccountBalanceWallet,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Nenhum lançamento encontrado",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "Ajuste os filtros acima ou registre novas entradas e saídas no caixa.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    initialDialogType = "RECEITA"
+                                    showAddDialog = true
+                                },
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Lançar Receita Rápida")
+                            }
+                        }
                     }
                 }
             } else {
@@ -529,6 +594,59 @@ fun FinancialSummaryCard(
                         Column {
                             Text("Saídas", style = MaterialTheme.typography.labelSmall, color = Color(0xFFB71C1C))
                             Text(MaskUtils.formatCurrency(totalExpense), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                }
+            }
+
+            val total = totalIncome + totalExpense
+            if (total > 0) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        val incomePercent = (totalIncome / total) * 100
+                        Text(
+                            text = "${incomePercent.toInt()}% Entradas",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFF2E7D32),
+                            fontWeight = FontWeight.Bold
+                        )
+                        val expensePercent = (totalExpense / total) * 100
+                        Text(
+                            text = "${expensePercent.toInt()}% Saídas",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFFB71C1C),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(Color.LightGray.copy(alpha = 0.3f))
+                    ) {
+                        val weightIncome = (totalIncome / total).toFloat()
+                        val weightExpense = (totalExpense / total).toFloat()
+                        if (weightIncome > 0f) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .weight(weightIncome)
+                                    .background(Color(0xFF2E7D32))
+                            )
+                        }
+                        if (weightExpense > 0f) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .weight(weightExpense)
+                                    .background(MaterialTheme.colorScheme.error)
+                            )
                         }
                     }
                 }
@@ -847,201 +965,220 @@ fun AddEditTransactionDialog(
 
     val paymentMethods = listOf("PIX", "CARTAO_CREDITO", "CARTAO_DEBITO", "DINHEIRO", "BOLETO", "OUTROS")
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text(if (initialTransaction == null) "Novo Lançamento no Caixa" else "Editar Lançamento")
-        },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Type Selector (RECEITA / DESPESA)
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    SegmentedButton(
-                        selected = type == "RECEITA",
-                        onClick = {
-                            type = "RECEITA"
-                            category = "Serviços"
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-                    ) {
-                        Text("Receita (Entrada)")
-                    }
-                    SegmentedButton(
-                        selected = type == "DESPESA",
-                        onClick = {
-                            type = "DESPESA"
-                            category = "Fornecedores"
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-                    ) {
-                        Text("Despesa (Saída)")
-                    }
-                }
-
-                // Description Input
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Descrição / Motivo *") },
-                    singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("finance_desc_input")
-                )
-
-                // Amount Input
-                OutlinedTextField(
-                    value = amountText,
-                    onValueChange = { amountText = it.replace(',', '.') },
-                    label = { Text("Valor R$ *") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    prefix = { Text("R$ ") },
-                    singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("finance_amount_input")
-                )
-
-                // Category Dropdown
-                ExposedDropdownMenuBox(
-                    expanded = expandedCategory,
-                    onExpandedChange = { expandedCategory = !expandedCategory }
-                ) {
-                    OutlinedTextField(
-                        value = category,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Categoria") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expandedCategory,
-                        onDismissRequest = { expandedCategory = false }
-                    ) {
-                        categories.forEach { cat ->
-                            DropdownMenuItem(
-                                text = { Text(cat) },
-                                onClick = {
-                                    category = cat
-                                    expandedCategory = false
-                                }
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                if (initialTransaction == null) "Novo Lançamento no Caixa" else "Editar Lançamento",
+                                fontWeight = FontWeight.Bold
                             )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = onDismiss) {
+                                Icon(Icons.Default.Close, contentDescription = "Fechar")
+                            }
+                        },
+                        actions = {
+                            Button(
+                                onClick = {
+                                    val parsedAmount = amountText.toDoubleOrNull() ?: 0.0
+                                    if (description.isNotBlank() && parsedAmount > 0) {
+                                        onSave(
+                                            FinancialTransactionEntity(
+                                                id = initialTransaction?.id ?: 0,
+                                                type = type,
+                                                description = description.trim(),
+                                                amount = parsedAmount,
+                                                category = category,
+                                                date = date.trim(),
+                                                paymentMethod = paymentMethod,
+                                                status = status,
+                                                relatedAppointmentId = initialTransaction?.relatedAppointmentId,
+                                                relatedNfseId = initialTransaction?.relatedNfseId,
+                                                notes = notes.trim()
+                                            )
+                                        )
+                                    }
+                                },
+                                modifier = Modifier
+                                    .padding(end = 8.dp)
+                                    .testTag("btn_save_finance")
+                            ) {
+                                Text("Salvar")
+                            }
+                        }
+                    )
+                }
+            ) { padding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(20.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Type Selector (RECEITA / DESPESA)
+                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                        SegmentedButton(
+                            selected = type == "RECEITA",
+                            onClick = {
+                                type = "RECEITA"
+                                category = "Serviços"
+                            },
+                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+                        ) {
+                            Text("Receita (Entrada)")
+                        }
+                        SegmentedButton(
+                            selected = type == "DESPESA",
+                            onClick = {
+                                type = "DESPESA"
+                                category = "Fornecedores"
+                            },
+                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+                        ) {
+                            Text("Despesa (Saída)")
                         }
                     }
-                }
 
-                // Date & Payment Row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+                    // Description Input
                     OutlinedTextField(
-                        value = date,
-                        onValueChange = { date = it },
-                        label = { Text("Data (AAAA-MM-DD)") },
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text("Descrição / Motivo *") },
                         singleLine = true,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("finance_desc_input")
                     )
 
+                    // Amount Input
+                    OutlinedTextField(
+                        value = amountText,
+                        onValueChange = { amountText = it.replace(',', '.') },
+                        label = { Text("Valor R$ *") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        prefix = { Text("R$ ") },
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("finance_amount_input")
+                    )
+
+                    // Category Dropdown
                     ExposedDropdownMenuBox(
-                        expanded = expandedPayment,
-                        onExpandedChange = { expandedPayment = !expandedPayment },
-                        modifier = Modifier.weight(1f)
+                        expanded = expandedCategory,
+                        onExpandedChange = { expandedCategory = !expandedCategory }
                     ) {
                         OutlinedTextField(
-                            value = paymentMethod,
+                            value = category,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Pagamento") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPayment) },
-                            modifier = Modifier.menuAnchor()
+                            label = { Text("Categoria") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
                         )
                         ExposedDropdownMenu(
-                            expanded = expandedPayment,
-                            onDismissRequest = { expandedPayment = false }
+                            expanded = expandedCategory,
+                            onDismissRequest = { expandedCategory = false }
                         ) {
-                            paymentMethods.forEach { pm ->
+                            categories.forEach { cat ->
                                 DropdownMenuItem(
-                                    text = { Text(pm) },
+                                    text = { Text(cat) },
                                     onClick = {
-                                        paymentMethod = pm
-                                        expandedPayment = false
+                                        category = cat
+                                        expandedCategory = false
                                     }
                                 )
                             }
                         }
                     }
-                }
 
-                // Status Switch
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = if (status == "PAGO") "Lançamento PAGO / Efetivado" else "Lançamento PENDENTE",
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (status == "PAGO") Color(0xFF2E7D32) else Color(0xFFE65100)
-                    )
-                    Switch(
-                        checked = status == "PAGO",
-                        onCheckedChange = { isChecked ->
-                            status = if (isChecked) "PAGO" else "PENDENTE"
-                        }
-                    )
-                }
+                    // Date & Payment Row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = date,
+                            onValueChange = { date = it },
+                            label = { Text("Data (AAAA-MM-DD)") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
 
-                // Notes Input
-                OutlinedTextField(
-                    value = notes,
-                    onValueChange = { notes = it },
-                    label = { Text("Observações (Opcional)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val parsedAmount = amountText.toDoubleOrNull() ?: 0.0
-                    if (description.isNotBlank() && parsedAmount > 0) {
-                        onSave(
-                            FinancialTransactionEntity(
-                                id = initialTransaction?.id ?: 0,
-                                type = type,
-                                description = description.trim(),
-                                amount = parsedAmount,
-                                category = category,
-                                date = date.trim(),
-                                paymentMethod = paymentMethod,
-                                status = status,
-                                relatedAppointmentId = initialTransaction?.relatedAppointmentId,
-                                relatedNfseId = initialTransaction?.relatedNfseId,
-                                notes = notes.trim()
+                        ExposedDropdownMenuBox(
+                            expanded = expandedPayment,
+                            onExpandedChange = { expandedPayment = !expandedPayment },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            OutlinedTextField(
+                                value = paymentMethod,
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Pagamento") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPayment) },
+                                modifier = Modifier.menuAnchor()
                             )
+                            ExposedDropdownMenu(
+                                expanded = expandedPayment,
+                                onDismissRequest = { expandedPayment = false }
+                            ) {
+                                paymentMethods.forEach { pm ->
+                                    DropdownMenuItem(
+                                        text = { Text(pm) },
+                                        onClick = {
+                                            paymentMethod = pm
+                                            expandedPayment = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Status Switch
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = if (status == "PAGO") "Lançamento PAGO / Efetivado" else "Lançamento PENDENTE",
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (status == "PAGO") Color(0xFF2E7D32) else Color(0xFFE65100)
+                        )
+                        Switch(
+                            checked = status == "PAGO",
+                            onCheckedChange = { isChecked ->
+                                status = if (isChecked) "PAGO" else "PENDENTE"
+                            }
                         )
                     }
-                },
-                modifier = Modifier.testTag("btn_save_finance")
-            ) {
-                Text("Salvar Lançamento")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+
+                    // Notes Input
+                    OutlinedTextField(
+                        value = notes,
+                        onValueChange = { notes = it },
+                        label = { Text("Observações (Opcional)") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -1123,21 +1260,42 @@ fun FinanceReportDialog(
             }
         },
         confirmButton = {
-            Button(
-                onClick = {
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Relatorio_Financeiro", reportText)
-                    clipboard.setPrimaryClip(clip)
-                    Toast.makeText(context, "Relatório copiado para a área de transferência!", Toast.LENGTH_SHORT).show()
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, reportText)
+                            type = "text/plain"
+                        }
+                        val shareIntent = Intent.createChooser(sendIntent, "Compartilhar Relatório Financeiro")
+                        context.startActivity(shareIntent)
+                    }
+                ) {
+                    Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Compartilhar")
                 }
-            ) {
-                Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("Copiar DRE")
+
+                Button(
+                    onClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Relatorio_Financeiro", reportText)
+                        clipboard.setPrimaryClip(clip)
+                        Toast.makeText(context, "Relatório copiado para a área de transferência!", Toast.LENGTH_SHORT).show()
+                    }
+                ) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Copiar DRE")
+                }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) {
                 Text("Fechar")
             }
         }

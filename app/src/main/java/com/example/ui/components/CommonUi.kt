@@ -1,6 +1,7 @@
 package com.example.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -40,7 +41,6 @@ fun SalonTopAppBar(
     onSearchQueryChange: (String) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenWhatsApp: (() -> Unit)? = null,
-    onOpenThemeSelector: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var isSearchExpanded by remember { mutableStateOf(false) }
@@ -100,17 +100,6 @@ fun SalonTopAppBar(
                         Icon(
                             imageVector = if (isGridView) Icons.Default.ViewList else Icons.Default.GridView,
                             contentDescription = if (isGridView) "Exibir em Linha" else "Exibir em Grade",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    IconButton(
-                        onClick = { onOpenThemeSelector?.invoke() ?: onOpenSettings() },
-                        modifier = Modifier.testTag("settings_top_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Palette,
-                            contentDescription = "Personalizar Tema",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -176,6 +165,8 @@ fun ConfirmationAlertDialog(
         dismissButton = {
             OutlinedButton(
                 onClick = onDismiss,
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
                 modifier = Modifier.testTag("cancel_dialog_button")
             ) {
                 Text("Cancelar")

@@ -136,3 +136,101 @@ data class FinancialTransactionEntity(
     val relatedNfseId: Long? = null,
     val notes: String = ""
 )
+
+@Entity(tableName = "whatsapp_inbound_messages")
+data class WhatsAppInboundMessageEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val senderName: String,
+    val senderPhone: String,
+    val rawMessage: String,
+    val timestamp: Long = System.currentTimeMillis(),
+    val aiProcessed: Boolean = true,
+    val detectedIntent: String = "NEW_APPOINTMENT", // NEW_APPOINTMENT, RESCHEDULE, CANCELLATION, INQUIRY, UNKNOWN
+    val extractedClientName: String = "",
+    val extractedServiceName: String = "",
+    val extractedServiceId: Long? = null,
+    val extractedProfessionalName: String = "",
+    val extractedProfessionalId: Long? = null,
+    val extractedDate: String = "", // YYYY-MM-DD
+    val extractedTime: String = "", // HH:mm
+    val confidenceScore: Float = 0.95f,
+    val customerSentiment: String = "POSITIVO", // POSITIVO, NEUTRO, URGENTE, DUVIDA
+    val notes: String = "",
+    val suggestedReply: String = "",
+    val status: String = "PENDENTE", // PENDENTE, APROVADO, RECUSADO, AUTO_AGENDADO
+    val createdAppointmentId: Long? = null,
+    val preServiceStage: String = "TUDO_INFORMADO" // TUDO_INFORMADO, FALTA_SERVICO, FALTA_PROFISSIONAL, FALTA_DATA_HORA, INFORMACAO_INCOMPLETA
+)
+
+@Entity(tableName = "professional_notifications")
+data class ProfessionalNotificationEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val professionalId: Long,
+    val professionalName: String,
+    val professionalPhone: String,
+    val title: String,
+    val message: String,
+    val timestamp: Long = System.currentTimeMillis(),
+    val isRead: Boolean = false,
+    val appointmentId: Long? = null,
+    val inboundMessageId: Long? = null,
+    val type: String = "NOVO_AGENDAMENTO", // NOVO_AGENDAMENTO, CANCELAMENTO, REAGENDAMENTO, LEMBRETE
+    val whatsappDispatched: Boolean = false
+)
+
+@Entity(tableName = "ai_monitoring_config")
+data class AiMonitoringConfigEntity(
+    @PrimaryKey val id: Int = 1,
+    val isMonitoringActive: Boolean = true,
+    val autoApproveHighConfidence: Boolean = false,
+    val notifyProfessionalWhatsApp: Boolean = true,
+    val notifyAndroidSystem: Boolean = true,
+    val smartAutoReply: Boolean = true,
+    val autoPreServiceEnabled: Boolean = true,
+    val msgMissingService: String = "Olá {cliente}! Seja bem-vindo(a) ao {salão}. Para darmos andamento ao seu agendamento, qual serviço você gostaria de realizar? (Ex: Corte, Escova, Unhas, Estética)",
+    val msgMissingProfessional: String = "Olá {cliente}! Qual profissional de sua preferência você gostaria que realizasse o atendimento de {servico}?",
+    val msgMissingDateTime: String = "Olá {cliente}! Qual o melhor dia e horário para o seu agendamento de {servico}?",
+    val msgIncompleteInfo: String = "Olá {cliente}! Seja bem-vindo(a) ao {salão}! Para agendarmos seu horário, por favor nos informe: qual serviço você deseja realizar, sua profissional preferida e o dia/horário desejado.",
+    val msgCompleteConfirmation: String = "Olá {cliente}! Recebemos seu pedido para {servico} com {profissional} em {data} às {horario}. Seu agendamento foi pré-registrado com sucesso no {salão}!"
+)
+
+@Entity(tableName = "waiting_queue")
+data class WaitingQueueEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val clientId: Long,
+    val clientName: String,
+    val clientPhone: String,
+    val serviceName: String,
+    val professionalName: String,
+    val position: Int,
+    val status: String = "AGUARDANDO", // AGUARDANDO, CHAMADO, ATENDIDO, CANCELADO
+    val estimatedWaitMinutes: Int,
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+@Entity(tableName = "procedure_history")
+data class ProcedureHistoryEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val clientId: Long,
+    val clientName: String,
+    val serviceName: String,
+    val professionalName: String,
+    val date: String, // YYYY-MM-DD
+    val price: Double,
+    val notes: String = ""
+)
+
+@Entity(tableName = "vip_subscriptions")
+data class VipSubscriptionEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val clientId: Long,
+    val clientName: String,
+    val clientPhone: String,
+    val planName: String, // "Plano Barba VIP", "Plano Escova Ouro", "Plano Premium Total"
+    val monthlyFee: Double,
+    val status: String = "ATIVO", // ATIVO, PENDENTE_PIX, CANCELADO
+    val startDate: String,
+    val renewalDate: String,
+    val remainingBenefits: String // e.g. "2 escovas / mês, 1 hidratação"
+)
+
