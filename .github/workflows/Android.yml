@@ -24,19 +24,28 @@ jobs:
 
       - name: Configure Gradle & KSP flags
         run: |
-          echo "org.gradle.daemon=false" >> gradle.properties
-          echo "java.awt.headless=true" >> gradle.properties
-          echo "ksp.incremental=false" >> gradle.properties
-          echo "ksp.use.worker.api=true" >> gradle.properties
+          cat << 'EOF' > gradle.properties
+          org.gradle.jvmargs=-Xmx4g -XX:+HeapDumpOnOutOfMemoryError -Djava.awt.headless=true -Dfile.encoding=UTF-8
+          org.gradle.parallel=false
+          org.gradle.caching=true
+          org.gradle.configuration-cache=false
+          org.gradle.workers.max=1
+          kotlin.code.style=official
+          android.nonTransitiveRClass=true
+          kotlin.compiler.execution.strategy=in-process
+          googleServices.missing.passthrough=true
+          ksp.incremental=false
+          ksp.use.worker.api=false
+          EOF
 
       - name: Generate temporary debug keystore
         run: |
           keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
       - name: Build Debug APK
-        run: gradle assembleDebug
+        run: gradle assembleDebug --no-daemon
         env:
-          GRADLE_OPTS: "-Djava.awt.headless=true -Dorg.gradle.daemon=false"
+          GRADLE_OPTS: "-Djava.awt.headless=true"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
