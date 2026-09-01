@@ -49,41 +49,21 @@ abstract class AppDatabase : RoomDatabase() {
                     "salon_beauty_db"
                 )
                 .fallbackToDestructiveMigration()
-                .addCallback(DatabaseCallback(context))
+                .addCallback(DatabaseCallback())
                 .build()
                 INSTANCE = instance
                 instance
             }
         }
 
-        private class DatabaseCallback(
-            private val context: Context
-        ) : RoomDatabase.Callback() {
+        private class DatabaseCallback : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        getDatabase(context).salonDao().let { populateDatabase(it) }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-
-            override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
-                super.onDestructiveMigration(db)
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        getDatabase(context).salonDao().let { populateDatabase(it) }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
             }
         }
 
         suspend fun populateDatabase(dao: SalonDao) {
-            // Settings
+            // Only populate if database is completely fresh
             if (dao.getSettings() == null) {
                 dao.insertOrUpdateSettings(
                     SalonSettingsEntity(
@@ -98,7 +78,6 @@ abstract class AppDatabase : RoomDatabase() {
                         useDynamicColor = false
                     )
                 )
-            }
 
                 // Clients
                 val c1 = dao.insertClient(ClientEntity(name = "Mariana Silva", cpf = "123.456.789-01", phone = "(11) 98765-4321", email = "mariana@gmail.com", birthDate = "1994-07-15"))
@@ -517,4 +496,6 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
     }
+}
+
 
