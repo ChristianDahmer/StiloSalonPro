@@ -41,6 +41,7 @@ fun SalonTopAppBar(
     onSearchQueryChange: (String) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenWhatsApp: (() -> Unit)? = null,
+    onNavigateBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var isSearchExpanded by remember { mutableStateOf(false) }
@@ -52,6 +53,19 @@ fun SalonTopAppBar(
     ) {
         Column(modifier = modifier.fillMaxWidth()) {
             CenterAlignedTopAppBar(
+                navigationIcon = {
+                    if (onNavigateBack != null) {
+                        IconButton(
+                            onClick = onNavigateBack,
+                            modifier = Modifier.testTag("top_bar_back_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Voltar"
+                            )
+                        }
+                    }
+                },
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
@@ -251,11 +265,9 @@ fun MaskedOutlinedTextField(
         label = { Text(if (isRequired) "$label *" else label) },
         visualTransformation = visualTransformation,
         isError = errorText != null,
-        supportingText = {
-            if (errorText != null) {
-                Text(text = errorText!!, color = MaterialTheme.colorScheme.error)
-            }
-        },
+        supportingText = if (errorText != null) {
+            { Text(text = errorText!!, color = MaterialTheme.colorScheme.error) }
+        } else null,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true,
         modifier = modifier.fillMaxWidth()

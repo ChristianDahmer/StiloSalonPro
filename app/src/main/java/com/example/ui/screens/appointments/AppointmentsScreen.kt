@@ -138,12 +138,12 @@ fun AppointmentsScreen(
                 tonalElevation = 1.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp)) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         listOf(
@@ -156,243 +156,128 @@ fun AppointmentsScreen(
                             FilterChip(
                                 selected = calendarViewMode == key,
                                 onClick = { viewModel.setCalendarViewMode(key) },
-                                label = { Text(label, fontSize = 12.sp) }
+                                label = { Text(label, fontSize = 11.sp) },
+                                modifier = Modifier.height(26.dp)
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    // Date Navigation & Professional Filters Row
+                    // Date Navigation Row (compact spacing between Hoje and date)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
-                        // Date selector with navigation arrows
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.weight(1f)
+                        IconButton(
+                            onClick = {
+                                val newDate = when (calendarViewMode) {
+                                    "DAY" -> CalendarHelper.addDays(selectedDate, -1)
+                                    "WEEK" -> CalendarHelper.addDays(selectedDate, -7)
+                                    "FORTNIGHT" -> CalendarHelper.addDays(selectedDate, -15)
+                                    "MONTH" -> CalendarHelper.addMonths(selectedDate, -1)
+                                    "YEAR" -> CalendarHelper.addYears(selectedDate, -1)
+                                    else -> CalendarHelper.addDays(selectedDate, -1)
+                                }
+                                viewModel.setSelectedDate(newDate)
+                            },
+                            modifier = Modifier.size(26.dp)
                         ) {
-                            IconButton(
-                                onClick = {
-                                    val newDate = when (calendarViewMode) {
-                                        "DAY" -> CalendarHelper.addDays(selectedDate, -1)
-                                        "WEEK" -> CalendarHelper.addDays(selectedDate, -7)
-                                        "FORTNIGHT" -> CalendarHelper.addDays(selectedDate, -15)
-                                        "MONTH" -> CalendarHelper.addMonths(selectedDate, -1)
-                                        "YEAR" -> CalendarHelper.addYears(selectedDate, -1)
-                                        else -> CalendarHelper.addDays(selectedDate, -1)
-                                    }
-                                    viewModel.setSelectedDate(newDate)
-                                },
-                                modifier = Modifier.size(36.dp)
-                            ) {
-                                Icon(Icons.Default.ChevronLeft, contentDescription = "Anterior", modifier = Modifier.size(20.dp))
-                            }
-
-                            Button(
-                                onClick = {
-                                    viewModel.setSelectedDate(MaskUtils.getCurrentDateIso())
-                                },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                                modifier = Modifier.height(36.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            ) {
-                                Text("Hoje", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                            }
-
-                            IconButton(
-                                onClick = {
-                                    val newDate = when (calendarViewMode) {
-                                        "DAY" -> CalendarHelper.addDays(selectedDate, 1)
-                                        "WEEK" -> CalendarHelper.addDays(selectedDate, 7)
-                                        "FORTNIGHT" -> CalendarHelper.addDays(selectedDate, 15)
-                                        "MONTH" -> CalendarHelper.addMonths(selectedDate, 1)
-                                        "YEAR" -> CalendarHelper.addYears(selectedDate, 1)
-                                        else -> CalendarHelper.addDays(selectedDate, 1)
-                                    }
-                                    viewModel.setSelectedDate(newDate)
-                                },
-                                modifier = Modifier.size(36.dp)
-                            ) {
-                                Icon(Icons.Default.ChevronRight, contentDescription = "Próximo", modifier = Modifier.size(20.dp))
-                            }
-
-                            Spacer(modifier = Modifier.width(4.dp))
-
-                            Text(
-                                text = when (calendarViewMode) {
-                                    "MONTH" -> CalendarHelper.getMonthLabel(selectedDate)
-                                    "YEAR" -> CalendarHelper.getYearLabel(selectedDate)
-                                    else -> MaskUtils.formatDatePtBr(selectedDate)
-                                },
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                                maxLines = 1,
-                                modifier = Modifier.weight(1f)
-                            )
+                            Icon(Icons.Default.ChevronLeft, contentDescription = "Anterior", modifier = Modifier.size(16.dp))
                         }
 
-                        // Professional filter dropdown / chip
-                        FilterChip(
-                            selected = selectedProfFilter != null,
+                        Button(
                             onClick = {
-                                if (selectedProfFilter != null) {
-                                    viewModel.setSelectedProfFilter(null)
-                                } else {
-                                    viewModel.setSelectedProfFilter(professionals.firstOrNull()?.id)
-                                }
+                                viewModel.setSelectedDate(MaskUtils.getCurrentDateIso())
                             },
-                            label = {
-                                val profName = professionals.firstOrNull { it.id == selectedProfFilter }?.name ?: "Profissionais"
-                                Text(profName, maxLines = 1, fontSize = 11.sp)
-                            },
-                            trailingIcon = {
-                                if (selectedProfFilter != null) {
-                                    Icon(Icons.Default.Close, contentDescription = "Limpar filtro", modifier = Modifier.size(14.dp))
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 1.dp),
+                            modifier = Modifier.height(26.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        ) {
+                            Text("Hoje", style = MaterialTheme.typography.labelSmall, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+
+                        IconButton(
+                            onClick = {
+                                val newDate = when (calendarViewMode) {
+                                    "DAY" -> CalendarHelper.addDays(selectedDate, 1)
+                                    "WEEK" -> CalendarHelper.addDays(selectedDate, 7)
+                                    "FORTNIGHT" -> CalendarHelper.addDays(selectedDate, 15)
+                                    "MONTH" -> CalendarHelper.addMonths(selectedDate, 1)
+                                    "YEAR" -> CalendarHelper.addYears(selectedDate, 1)
+                                    else -> CalendarHelper.addDays(selectedDate, 1)
                                 }
-                            }
+                                viewModel.setSelectedDate(newDate)
+                            },
+                            modifier = Modifier.size(26.dp)
+                        ) {
+                            Icon(Icons.Default.ChevronRight, contentDescription = "Próximo", modifier = Modifier.size(16.dp))
+                        }
+
+                        Spacer(modifier = Modifier.width(2.dp))
+
+                        Text(
+                            text = when (calendarViewMode) {
+                                "MONTH" -> CalendarHelper.getMonthLabel(selectedDate)
+                                "YEAR" -> CalendarHelper.getYearLabel(selectedDate)
+                                else -> MaskUtils.formatDatePtBr(selectedDate)
+                            },
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Dashboard Banner & Quick Actions
+            // Dashboard Banner (Compact)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 10.dp, vertical = 2.dp)
             ) {
-                // 1. Dashboard Banner
                 ElevatedCard(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.elevatedCardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                     )
                 ) {
                     Row(
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(26.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.primary),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Celebration, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                            Icon(Icons.Default.Celebration, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(15.dp))
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Seu Salão Elegance",
-                                style = MaterialTheme.typography.titleSmall,
+                                style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             val totalToday = appointments.filter { it.date == selectedDate && !it.isBlock }.size
                             Text(
-                                text = "$totalToday agendamento(s) para o período visualizado.",
-                                style = MaterialTheme.typography.bodySmall,
+                                text = "$totalToday agendamento(s) no período.",
+                                style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                             )
                         }
                     }
                 }
-
-                // 2. Quick Actions wrapping flow row
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Action 1: Add Appointment
-                    AssistChip(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            selectedAppointmentToEdit = null
-                            prefilledTimeSlot = "09:00"
-                            showAddDialog = true
-                        },
-                        label = { Text("Agendar Horário", fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false) },
-                        leadingIcon = { Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
-                            labelColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    )
-
-                    // Action 2: Quick block
-                    AssistChip(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            val blockApp = AppointmentEntity(
-                                clientId = 0L,
-                                clientName = "",
-                                clientPhone = "",
-                                serviceId = 0L,
-                                serviceName = "Intervalo / Almoço",
-                                professionalId = professionals.firstOrNull()?.id ?: 0L,
-                                professionalName = professionals.firstOrNull()?.name ?: "",
-                                date = selectedDate,
-                                time = "12:00",
-                                durationMinutes = 60,
-                                price = 0.0,
-                                isBlock = true
-                            )
-                            selectedAppointmentToEdit = blockApp
-                            showAddDialog = true
-                        },
-                        label = { Text("Bloquear Intervalo", fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false) },
-                        leadingIcon = { Icon(Icons.Default.Block, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    )
-
-                    // Action 3: Quick Client
-                    AssistChip(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            showQuickClientDialog = true
-                        },
-                        label = { Text("Novo Cliente", fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false) },
-                        leadingIcon = { Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f),
-                            labelColor = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                    )
-
-                    // Action 4: Sync Finances
-                    AssistChip(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            viewModel.syncAppointmentsToFinancial(context)
-                        },
-                        label = { Text("Sincronizar Caixa", fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false) },
-                        leadingIcon = { Icon(Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = Color(0xFFE8F5E9),
-                            labelColor = Color(0xFF2E7D32)
-                        )
-                    )
-                }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             // Calendar Content based on selected mode
             when (calendarViewMode) {
@@ -402,9 +287,9 @@ fun AppointmentsScreen(
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             items(hours) { hour ->
                                 val appsInHour = filteredAppointments.filter { app ->
@@ -415,10 +300,10 @@ fun AppointmentsScreen(
                                     colors = CardDefaults.cardColors(
                                         containerColor = if (appsInHour.isNotEmpty()) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f)
                                     ),
-                                    shape = RoundedCornerShape(12.dp),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                                    shape = RoundedCornerShape(8.dp),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
                                 ) {
-                                    Column(modifier = Modifier.padding(10.dp)) {
+                                    Column(modifier = Modifier.padding(4.dp)) {
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -426,14 +311,14 @@ fun AppointmentsScreen(
                                         ) {
                                             Text(
                                                 text = hour,
-                                                style = MaterialTheme.typography.titleSmall,
+                                                style = MaterialTheme.typography.labelMedium,
                                                 fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.primary
                                             )
                                         }
-                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Spacer(modifier = Modifier.height(2.dp))
                                         if (appsInHour.isNotEmpty()) {
-                                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                                                 appsInHour.forEach { app ->
                                                     val hasNfse = nfseList.any { 
                                                         (it.appointmentId == app.id || (it.serviceName.equals(app.serviceName, ignoreCase = true) && it.clientName.equals(app.clientName, ignoreCase = true))) && it.status == "EMITIDA"
@@ -443,7 +328,7 @@ fun AppointmentsScreen(
                                                         hasNfse = hasNfse,
                                                         onEdit = { requestEditAppointment(app) },
                                                         onDelete = {
-                                                            if (hasNfse) requestEditAppointment(app) else viewModel.deleteAppointment(app)
+                                                             if (hasNfse) requestEditAppointment(app) else viewModel.deleteAppointment(app)
                                                         },
                                                         onDuplicate = { viewModel.duplicateAppointment(app) },
                                                         onCompleteAndIssueNfse = { appointmentToComplete = app },
@@ -463,14 +348,14 @@ fun AppointmentsScreen(
                                                         showAddDialog = true
                                                     }
                                                     .background(
-                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                                                        shape = RoundedCornerShape(8.dp)
+                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f),
+                                                        shape = RoundedCornerShape(6.dp)
                                                     )
                                                     .border(
                                                         BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
-                                                        shape = RoundedCornerShape(8.dp)
+                                                        shape = RoundedCornerShape(6.dp)
                                                     )
-                                                    .padding(horizontal = 8.dp, vertical = 10.dp),
+                                                    .padding(horizontal = 6.dp, vertical = 4.dp),
                                                 verticalAlignment = Alignment.CenterVertically,
                                                 horizontalArrangement = Arrangement.Center
                                             ) {
@@ -478,12 +363,13 @@ fun AppointmentsScreen(
                                                     imageVector = Icons.Default.AddCircleOutline,
                                                     contentDescription = "Agendar",
                                                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                                    modifier = Modifier.size(16.dp)
+                                                    modifier = Modifier.size(14.dp)
                                                 )
-                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Spacer(modifier = Modifier.width(3.dp))
                                                 Text(
                                                     text = "Livre",
                                                     style = MaterialTheme.typography.labelSmall,
+                                                    fontSize = 10.sp,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                                 )
                                             }
@@ -495,8 +381,8 @@ fun AppointmentsScreen(
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                            contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                            verticalArrangement = Arrangement.spacedBy(3.dp)
                         ) {
                             items(hours) { hour ->
                                 val appsInHour = filteredAppointments.filter { app ->
@@ -509,30 +395,30 @@ fun AppointmentsScreen(
                                     // Left side: Hour
                                     Column(
                                         modifier = Modifier
-                                            .width(60.dp)
-                                            .padding(top = 4.dp),
+                                            .width(46.dp)
+                                            .padding(top = 2.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Text(
                                             text = hour,
-                                            style = MaterialTheme.typography.titleMedium,
+                                            style = MaterialTheme.typography.labelMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                         Box(
                                             modifier = Modifier
                                                 .width(2.dp)
-                                                .height(50.dp)
+                                                .height(24.dp)
                                                 .background(MaterialTheme.colorScheme.outlineVariant)
                                         )
                                     }
 
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
 
                                     // Right side: Appointment card or Quick Book slot
                                     Box(modifier = Modifier.weight(1f)) {
                                         if (appsInHour.isNotEmpty()) {
-                                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                                                 appsInHour.forEach { app ->
                                                     val hasNfse = nfseList.any { 
                                                         (it.appointmentId == app.id || (it.serviceName.equals(app.serviceName, ignoreCase = true) && it.clientName.equals(app.clientName, ignoreCase = true))) && it.status == "EMITIDA"
@@ -563,26 +449,27 @@ fun AppointmentsScreen(
                                                         showAddDialog = true
                                                     }
                                                     .background(
-                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                                                        shape = RoundedCornerShape(12.dp)
+                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                                                        shape = RoundedCornerShape(8.dp)
                                                     )
                                                     .border(
-                                                        BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-                                                        shape = RoundedCornerShape(12.dp)
+                                                        BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+                                                        shape = RoundedCornerShape(8.dp)
                                                     )
-                                                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                                                    .padding(horizontal = 8.dp, vertical = 6.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.AddCircleOutline,
                                                     contentDescription = "Agendar",
                                                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                                    modifier = Modifier.size(20.dp)
+                                                    modifier = Modifier.size(14.dp)
                                                 )
-                                                Spacer(modifier = Modifier.width(10.dp))
+                                                Spacer(modifier = Modifier.width(6.dp))
                                                 Text(
-                                                    text = "Horário Disponível — Toque para agendar",
-                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    text = "Livre — Toque para agendar",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontSize = 11.sp,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                                 )
                                             }
@@ -604,9 +491,9 @@ fun AppointmentsScreen(
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             items(daysList) { day ->
                                 val dateIso = CalendarHelper.formatIso(day)
@@ -617,13 +504,13 @@ fun AppointmentsScreen(
 
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp),
+                                    shape = RoundedCornerShape(10.dp),
                                     colors = CardDefaults.cardColors(
                                         containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface
                                     ),
                                     border = if (isSelected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null
                                 ) {
-                                    Column(modifier = Modifier.padding(12.dp)) {
+                                    Column(modifier = Modifier.padding(8.dp)) {
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -631,7 +518,7 @@ fun AppointmentsScreen(
                                                     viewModel.setSelectedDate(dateIso)
                                                     viewModel.setCalendarViewMode("DAY")
                                                 }
-                                                .padding(vertical = 4.dp),
+                                                .padding(vertical = 2.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
@@ -640,12 +527,12 @@ fun AppointmentsScreen(
                                                     imageVector = Icons.Default.Today,
                                                     contentDescription = null,
                                                     tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(16.dp)
+                                                    modifier = Modifier.size(14.dp)
                                                 )
-                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Spacer(modifier = Modifier.width(4.dp))
                                                 Text(
                                                     text = "${CalendarHelper.getDayOfMonthLabel(day)} (${CalendarHelper.getDayOfWeekLabel(day).substring(0, 3)})",
-                                                    style = MaterialTheme.typography.titleSmall,
+                                                    style = MaterialTheme.typography.labelMedium,
                                                     fontWeight = FontWeight.Bold,
                                                     color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                                                     maxLines = 1
@@ -654,17 +541,17 @@ fun AppointmentsScreen(
 
                                             Text(
                                                 text = "${appsForDay.size}",
-                                                style = MaterialTheme.typography.bodySmall,
+                                                style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.primary
                                             )
                                         }
 
-                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Spacer(modifier = Modifier.height(4.dp))
 
                                         // Quick slots for key hours
                                         val quickHours = listOf("09:00", "12:00", "15:00", "18:00")
-                                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                                             quickHours.forEach { hour ->
                                                 val matchApp = appsForDay.find { it.time.substringBefore(":") == hour.substringBefore(":") }
                                                 if (matchApp != null) {
@@ -674,7 +561,7 @@ fun AppointmentsScreen(
                                                         colors = SuggestionChipDefaults.suggestionChipColors(
                                                             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                                                         ),
-                                                        modifier = Modifier.fillMaxWidth()
+                                                        modifier = Modifier.fillMaxWidth().height(24.dp)
                                                     )
                                                 } else {
                                                     SuggestionChip(
@@ -684,7 +571,7 @@ fun AppointmentsScreen(
                                                             showAddDialog = true
                                                         },
                                                         label = { Text(hour, fontSize = 10.sp) },
-                                                        modifier = Modifier.fillMaxWidth()
+                                                        modifier = Modifier.fillMaxWidth().height(24.dp)
                                                     )
                                                 }
                                             }
@@ -696,8 +583,8 @@ fun AppointmentsScreen(
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             items(daysList) { day ->
                                 val dateIso = CalendarHelper.formatIso(day)
@@ -708,13 +595,13 @@ fun AppointmentsScreen(
 
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp),
+                                    shape = RoundedCornerShape(10.dp),
                                     colors = CardDefaults.cardColors(
                                         containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface
                                     ),
                                     border = if (isSelected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null
                                 ) {
-                                    Column(modifier = Modifier.padding(12.dp)) {
+                                    Column(modifier = Modifier.padding(8.dp)) {
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -722,7 +609,7 @@ fun AppointmentsScreen(
                                                     viewModel.setSelectedDate(dateIso)
                                                     viewModel.setCalendarViewMode("DAY")
                                                 }
-                                                .padding(vertical = 4.dp),
+                                                .padding(vertical = 2.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
@@ -731,12 +618,12 @@ fun AppointmentsScreen(
                                                     imageVector = Icons.Default.Today,
                                                     contentDescription = null,
                                                     tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(18.dp)
+                                                    modifier = Modifier.size(16.dp)
                                                 )
-                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Spacer(modifier = Modifier.width(6.dp))
                                                 Text(
                                                     text = "${CalendarHelper.getDayOfWeekLabel(day)}, ${CalendarHelper.getDayOfMonthLabel(day)}",
-                                                    style = MaterialTheme.typography.titleMedium,
+                                                    style = MaterialTheme.typography.titleSmall,
                                                     fontWeight = FontWeight.Bold,
                                                     color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                                 )
@@ -744,12 +631,12 @@ fun AppointmentsScreen(
 
                                             Text(
                                                 text = "${appsForDay.size} Agendamento(s)",
-                                                style = MaterialTheme.typography.bodySmall,
+                                                style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.outline
                                             )
                                         }
 
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Spacer(modifier = Modifier.height(4.dp))
 
                                         // Quick slots for key hours
                                         val quickHours = listOf("08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00")
@@ -757,17 +644,18 @@ fun AppointmentsScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .horizontalScroll(rememberScrollState()),
-                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                                         ) {
                                             quickHours.forEach { hour ->
                                                 val matchApp = appsForDay.find { it.time.substringBefore(":") == hour.substringBefore(":") }
                                                 if (matchApp != null) {
                                                     SuggestionChip(
                                                         onClick = { requestEditAppointment(matchApp) },
-                                                        label = { Text("🔒 $hour: ${matchApp.clientName.split(" ").firstOrNull()}") },
+                                                        label = { Text("🔒 $hour: ${matchApp.clientName.split(" ").firstOrNull()}", fontSize = 10.sp) },
                                                         colors = SuggestionChipDefaults.suggestionChipColors(
                                                             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                                                        )
+                                                        ),
+                                                        modifier = Modifier.height(24.dp)
                                                     )
                                                 } else {
                                                     SuggestionChip(
@@ -776,7 +664,8 @@ fun AppointmentsScreen(
                                                             prefilledTimeSlot = hour
                                                             showAddDialog = true
                                                         },
-                                                        label = { Text(hour) }
+                                                        label = { Text(hour, fontSize = 10.sp) },
+                                                        modifier = Modifier.height(24.dp)
                                                     )
                                                 }
                                             }
@@ -794,14 +683,14 @@ fun AppointmentsScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp)
+                            .padding(10.dp)
                     ) {
                         // Weekdays Header
                         Row(modifier = Modifier.fillMaxWidth()) {
                             weekdays.forEach { wd ->
                                 Text(
                                     text = wd,
-                                    style = MaterialTheme.typography.labelMedium,
+                                    style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.weight(1f),
                                     textAlign = TextAlign.Center,
@@ -810,11 +699,11 @@ fun AppointmentsScreen(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
 
                         // Days Grid (6 weeks)
                         val chunkedDays = monthDays.chunked(7)
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             chunkedDays.forEach { week ->
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     week.forEach { day ->
@@ -832,8 +721,8 @@ fun AppointmentsScreen(
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .aspectRatio(1f)
-                                                .padding(3.dp)
-                                                .clip(RoundedCornerShape(8.dp))
+                                                .padding(2.dp)
+                                                .clip(RoundedCornerShape(6.dp))
                                                 .background(
                                                     color = when {
                                                         isSelected -> MaterialTheme.colorScheme.primaryContainer
@@ -855,7 +744,7 @@ fun AppointmentsScreen(
                                                         isToday -> MaterialTheme.colorScheme.secondary
                                                         else -> Color.Transparent
                                                     },
-                                                    shape = RoundedCornerShape(8.dp)
+                                                    shape = RoundedCornerShape(6.dp)
                                                 )
                                                 .clickable {
                                                     viewModel.setSelectedDate(dateIso)
@@ -869,7 +758,7 @@ fun AppointmentsScreen(
                                             ) {
                                                 Text(
                                                     text = SimpleDateFormat("d", Locale.getDefault()).format(day),
-                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    style = MaterialTheme.typography.labelMedium,
                                                     fontWeight = if (isSelected || isToday || hasApps) FontWeight.Bold else FontWeight.Normal,
                                                     color = when {
                                                         isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
@@ -880,7 +769,7 @@ fun AppointmentsScreen(
                                                 )
 
                                                 if (hasApps) {
-                                                    Spacer(modifier = Modifier.height(2.dp))
+                                                    Spacer(modifier = Modifier.height(1.dp))
                                                     Surface(
                                                         color = MaterialTheme.colorScheme.primary,
                                                         shape = CircleShape
@@ -889,9 +778,9 @@ fun AppointmentsScreen(
                                                             text = "${appsForDay.size}",
                                                             color = MaterialTheme.colorScheme.onPrimary,
                                                             style = MaterialTheme.typography.labelSmall,
-                                                            fontSize = 9.sp,
+                                                            fontSize = 8.sp,
                                                             fontWeight = FontWeight.Bold,
-                                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                                            modifier = Modifier.padding(horizontal = 3.dp, vertical = 0.5.dp)
                                                         )
                                                     }
                                                 }
@@ -902,25 +791,25 @@ fun AppointmentsScreen(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // Month Footer: Quick schedule bar for the currently selected date
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(10.dp)
                         ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
+                            Column(modifier = Modifier.padding(8.dp)) {
                                 Text(
                                     text = "Agendamento rápido para ${MaskUtils.formatDatePtBr(selectedDate)}:",
-                                    style = MaterialTheme.typography.titleSmall,
+                                    style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .horizontalScroll(rememberScrollState()),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     val quickHours = listOf("08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00")
                                     quickHours.forEach { hr ->
@@ -930,7 +819,8 @@ fun AppointmentsScreen(
                                         if (taken != null) {
                                             SuggestionChip(
                                                 onClick = { requestEditAppointment(taken) },
-                                                label = { Text("🔒 $hr: ${taken.clientName.split(" ").firstOrNull()}") }
+                                                label = { Text("🔒 $hr: ${taken.clientName.split(" ").firstOrNull()}", fontSize = 10.sp) },
+                                                modifier = Modifier.height(24.dp)
                                             )
                                         } else {
                                             SuggestionChip(
@@ -938,7 +828,8 @@ fun AppointmentsScreen(
                                                     prefilledTimeSlot = hr
                                                     showAddDialog = true
                                                 },
-                                                label = { Text(hr) }
+                                                label = { Text(hr, fontSize = 10.sp) },
+                                                modifier = Modifier.height(24.dp)
                                             )
                                         }
                                     }
@@ -951,9 +842,9 @@ fun AppointmentsScreen(
                     val months = CalendarHelper.getMonthsOfYear(selectedDate)
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(months) { month ->
@@ -970,26 +861,26 @@ fun AppointmentsScreen(
                                         viewModel.setSelectedDate(monthIso)
                                         viewModel.setCalendarViewMode("MONTH")
                                     },
-                                shape = RoundedCornerShape(12.dp)
+                                shape = RoundedCornerShape(10.dp)
                             ) {
                                 Column(
-                                    modifier = Modifier.padding(12.dp),
+                                    modifier = Modifier.padding(8.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
                                         text = monthName,
-                                        style = MaterialTheme.typography.titleMedium,
+                                        style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.primary
                                     )
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Icon(
                                         imageVector = Icons.Default.CalendarMonth,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.outline,
-                                        modifier = Modifier.size(32.dp)
+                                        modifier = Modifier.size(24.dp)
                                     )
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = "$totalApps agendamento(s)",
                                         style = MaterialTheme.typography.labelSmall,
@@ -1140,14 +1031,14 @@ fun AppointmentListItem(
                     onDoubleTap = { onEdit() }
                 )
             },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp)
+                .padding(horizontal = 10.dp, vertical = 6.dp)
         ) {
-            // Header: Client/Service Name + Status
+            // Header: Client/Service Name + Duration + Status
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1155,64 +1046,70 @@ fun AppointmentListItem(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.weight(1f, fill = false)
                 ) {
                     Text(
                         text = if (appointment.isBlock) appointment.serviceName else appointment.clientName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
                     )
                     if (hasNfse) {
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "NF-e Emitida - Bloqueado",
                             tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(14.dp)
                         )
                     }
+                    Text(
+                        text = "• ${appointment.durationMinutes}m",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    )
                 }
                 StatusBadgeChip(status = appointment.status)
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            // Subtitle: Service & Professional (compact)
+            if (!appointment.isBlock) {
+                Text(
+                    text = "${appointment.serviceName} • ${appointment.professionalName}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+            } else {
+                Text(
+                    text = "Bloqueio • ${appointment.professionalName}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFFE65100),
+                    maxLines = 1
+                )
+            }
 
-            // Indented details section (tempo de agendamento levemente identado para dentro da agenda)
-            Column(
+            if (appointment.notes.isNotBlank()) {
+                Text(
+                    text = "Obs: ${appointment.notes}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    maxLines = 1
+                )
+            }
+
+            // Bottom Row: Price & Payment method + Action buttons aligned on same row
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 12.dp)
+                    .padding(top = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Tempo de agendamento identado e legível
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Schedule,
-                        contentDescription = "Tempo de agendamento",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = "Duração: ${appointment.durationMinutes} min",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
                 if (!appointment.isBlock) {
-                    Text(
-                        text = "${appointment.serviceName} • ${appointment.professionalName}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Text(
                             text = MaskUtils.formatCurrency(appointment.price),
@@ -1226,64 +1123,49 @@ fun AppointmentListItem(
                             "OUTROS" -> "📌 Outros"
                             else -> "💳 Cartão"
                         }
-                        SuggestionChip(
-                            onClick = {},
-                            label = { Text(payLabel, fontSize = 10.sp) },
-                            modifier = Modifier.height(24.dp)
+                        Text(
+                            text = payLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                         )
                     }
                 } else {
-                    Text(
-                        text = "Profissional: ${appointment.professionalName}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFE65100)
-                    )
+                    Spacer(modifier = Modifier.width(1.dp))
                 }
 
-                if (appointment.notes.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "Obs: ${appointment.notes}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                }
-            }
+                // Action Buttons Row
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (!appointment.isBlock) {
+                        IconButton(onClick = onWhatsAppMsg, modifier = Modifier.size(28.dp)) {
+                            Icon(painter = painterResource(id = R.drawable.ic_whatsapp), contentDescription = "Enviar WhatsApp", tint = Color.Unspecified, modifier = Modifier.size(16.dp))
+                        }
 
-            Spacer(modifier = Modifier.height(8.dp))
+                        IconButton(onClick = onDuplicate, modifier = Modifier.size(28.dp)) {
+                            Icon(Icons.Outlined.ContentCopy, contentDescription = "Copiar/Duplicar", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                        }
 
-            // Action Buttons Row
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (!appointment.isBlock) {
-                    IconButton(onClick = onWhatsAppMsg, modifier = Modifier.size(32.dp)) {
-                        Icon(painter = painterResource(id = R.drawable.ic_whatsapp), contentDescription = "Enviar WhatsApp", tint = Color.Unspecified, modifier = Modifier.size(18.dp))
-                    }
-
-                    IconButton(onClick = onDuplicate, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Outlined.ContentCopy, contentDescription = "Copiar/Duplicar", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                    }
-
-                    if (appointment.status == "AGENDADO") {
-                        IconButton(onClick = onCompleteAndIssueNfse, modifier = Modifier.size(32.dp)) {
-                            Icon(Icons.Default.ReceiptLong, contentDescription = "Concluir & NFS-e", tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(18.dp))
+                        if (appointment.status == "AGENDADO") {
+                            IconButton(onClick = onCompleteAndIssueNfse, modifier = Modifier.size(28.dp)) {
+                                Icon(Icons.Default.ReceiptLong, contentDescription = "Concluir & NFS-e", tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(16.dp))
+                            }
                         }
                     }
-                }
 
-                IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
-                    Icon(
-                        imageVector = if (hasNfse) Icons.Default.Lock else Icons.Outlined.Edit,
-                        contentDescription = if (hasNfse) "Bloqueado por NF-e" else "Editar",
-                        tint = if (hasNfse) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                    IconButton(onClick = onEdit, modifier = Modifier.size(28.dp)) {
+                        Icon(
+                            imageVector = if (hasNfse) Icons.Default.Lock else Icons.Outlined.Edit,
+                            contentDescription = if (hasNfse) "Bloqueado por NF-e" else "Editar",
+                            tint = if (hasNfse) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
 
-                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Outlined.Delete, contentDescription = "Cancelar", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
+                    IconButton(onClick = onDelete, modifier = Modifier.size(28.dp)) {
+                        Icon(Icons.Outlined.Delete, contentDescription = "Cancelar", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                    }
                 }
             }
         }
@@ -1308,9 +1190,9 @@ fun AppointmentCardItem(
                     onDoubleTap = { onEdit() }
                 )
             },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1318,36 +1200,27 @@ fun AppointmentCardItem(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Schedule,
-                        contentDescription = "Tempo de agendamento",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
-                    )
                     Text(
-                        text = "Duração: ${appointment.durationMinutes} min",
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = "${appointment.durationMinutes} min",
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
                     if (hasNfse) {
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Bloqueado",
                             tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(12.dp)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
                     }
-                    StatusBadgeChip(status = appointment.status)
                 }
+                StatusBadgeChip(status = appointment.status)
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             Text(
                 text = if (appointment.isBlock) appointment.serviceName else appointment.clientName,
@@ -1358,18 +1231,11 @@ fun AppointmentCardItem(
 
             if (!appointment.isBlock) {
                 Text(
-                    text = appointment.serviceName,
+                    text = "${appointment.serviceName} • ${appointment.professionalName}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1
                 )
-                Text(
-                    text = appointment.professionalName,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline,
-                    maxLines = 1
-                )
-                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = MaskUtils.formatCurrency(appointment.price),
                     style = MaterialTheme.typography.labelLarge,
@@ -1384,27 +1250,27 @@ fun AppointmentCardItem(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 if (!appointment.isBlock) {
-                    IconButton(onClick = onWhatsAppMsg, modifier = Modifier.size(28.dp)) {
-                        Icon(painter = painterResource(id = R.drawable.ic_whatsapp), contentDescription = "Enviar WhatsApp", tint = Color.Unspecified, modifier = Modifier.size(16.dp))
+                    IconButton(onClick = onWhatsAppMsg, modifier = Modifier.size(26.dp)) {
+                        Icon(painter = painterResource(id = R.drawable.ic_whatsapp), contentDescription = "Enviar WhatsApp", tint = Color.Unspecified, modifier = Modifier.size(14.dp))
                     }
-                    IconButton(onClick = onDuplicate, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Outlined.ContentCopy, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                    IconButton(onClick = onDuplicate, modifier = Modifier.size(26.dp)) {
+                        Icon(Icons.Outlined.ContentCopy, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                     }
                     if (appointment.status == "AGENDADO") {
-                        IconButton(onClick = onCompleteAndIssueNfse, modifier = Modifier.size(28.dp)) {
-                            Icon(Icons.Default.ReceiptLong, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(16.dp))
+                        IconButton(onClick = onCompleteAndIssueNfse, modifier = Modifier.size(26.dp)) {
+                            Icon(Icons.Default.ReceiptLong, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(14.dp))
                         }
                     }
                 }
-                IconButton(onClick = onDelete, modifier = Modifier.size(28.dp)) {
-                    Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                IconButton(onClick = onDelete, modifier = Modifier.size(26.dp)) {
+                    Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(14.dp))
                 }
             }
         }

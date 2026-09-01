@@ -94,16 +94,17 @@ fun NfseScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Status:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
+                    Text("Status:", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
                     listOf(null to "Todas", "EMITIDA" to "Emitidas", "CANCELADA" to "Canceladas").forEach { (st, label) ->
                         FilterChip(
                             selected = selectedStatusFilter == st,
                             onClick = { selectedStatusFilter = st },
-                            label = { Text(label, fontSize = 12.sp, maxLines = 1, softWrap = false) }
+                            label = { Text(label, fontSize = 11.sp, maxLines = 1, softWrap = false) },
+                            modifier = Modifier.height(26.dp)
                         )
                     }
                 }
@@ -113,23 +114,23 @@ fun NfseScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(32.dp),
+                        .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = Icons.Outlined.Receipt,
                             contentDescription = null,
-                            modifier = Modifier.size(64.dp),
+                            modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.outline
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = "Nenhuma NFS-e emitida",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "As notas emitidas ao concluir agendamentos aparecerão aqui.",
                             style = MaterialTheme.typography.bodySmall,
@@ -141,9 +142,9 @@ fun NfseScreen(
                 if (isGridView) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(filteredNfseList, key = { it.id }) { nfse ->
@@ -156,8 +157,8 @@ fun NfseScreen(
                     }
                 } else {
                     LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(filteredNfseList, key = { it.id }) { nfse ->
@@ -224,43 +225,45 @@ fun NfseListItem(
                     onDoubleTap = { onPreview() }
                 )
             },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.ReceiptLong, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(Icons.Outlined.ReceiptLong, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "NFS-e #${nfse.number}",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 StatusBadgeChip(status = nfse.status)
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             Text(
                 text = "Cliente: ${nfse.clientName} (${nfse.clientCpf})",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1
             )
             Text(
                 text = "Serviço: ${nfse.serviceName}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
             )
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp),
+                    .padding(top = 2.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
@@ -277,48 +280,49 @@ fun NfseListItem(
             }
 
             if (nfse.status == "CANCELADA" && !nfse.cancellationReason.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "Motivo Cancelamento: ${nfse.cancellationReason}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
+                    maxLines = 1
                 )
             }
 
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            Divider(modifier = Modifier.padding(vertical = 4.dp))
 
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 TextButton(
                     onClick = onPreview,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                     modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
                 ) {
-                    Icon(Icons.Outlined.Visibility, contentDescription = null, modifier = Modifier.size(14.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(Icons.Outlined.Visibility, contentDescription = null, modifier = Modifier.size(13.dp))
+                    Spacer(modifier = Modifier.width(3.dp))
                     Text("Preview", fontSize = 11.sp, maxLines = 1, softWrap = false)
                 }
 
                 TextButton(
                     onClick = onDownloadXmlPdf,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                     modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
                 ) {
-                    Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(14.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(Icons.Outlined.Download, contentDescription = null, modifier = Modifier.size(13.dp))
+                    Spacer(modifier = Modifier.width(3.dp))
                     Text("XML/PDF", fontSize = 11.sp, maxLines = 1, softWrap = false)
                 }
 
                 TextButton(
                     onClick = onResend,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                     modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
                 ) {
-                    Icon(Icons.Outlined.Send, contentDescription = null, modifier = Modifier.size(14.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(Icons.Outlined.Send, contentDescription = null, modifier = Modifier.size(13.dp))
+                    Spacer(modifier = Modifier.width(3.dp))
                     Text("Reenviar", fontSize = 11.sp, maxLines = 1, softWrap = false)
                 }
 
@@ -326,11 +330,11 @@ fun NfseListItem(
                     TextButton(
                         onClick = onCancel,
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                         modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
                     ) {
-                        Icon(Icons.Outlined.Cancel, contentDescription = null, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(Icons.Outlined.Cancel, contentDescription = null, modifier = Modifier.size(13.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
                         Text("Cancelar", fontSize = 11.sp, maxLines = 1, softWrap = false)
                     }
                 }
@@ -347,15 +351,15 @@ fun NfsePreviewDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("NFS-e #${nfse.number} - Visualização", fontWeight = FontWeight.Bold)
+            Text("NFS-e #${nfse.number} - Visualização", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
         },
         text = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp))
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text("PREFEITURA MUNICIPAL - NOTA FISCAL DE SERVIÇOS ELETRÔNICA", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                 Divider()
@@ -390,14 +394,15 @@ fun NfseCancelDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Cancelar NFS-e #${nfse.number}") },
+        title = { Text("Cancelar NFS-e #${nfse.number}", style = MaterialTheme.typography.titleMedium) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Informe a justificativa de cancelamento obrigatória perante a Prefeitura:")
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Informe a justificativa de cancelamento obrigatória perante a Prefeitura:", style = MaterialTheme.typography.bodySmall)
                 OutlinedTextField(
                     value = reason,
                     onValueChange = { reason = it },
                     label = { Text("Justificativa de Cancelamento *") },
+                    singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -438,21 +443,22 @@ fun NfseConfigForm(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        ElevatedCard(shape = RoundedCornerShape(16.dp)) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        ElevatedCard(shape = RoundedCornerShape(10.dp)) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Credenciais & Certificado Digital A1", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Outlined.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Credenciais & Certificado Digital A1", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 }
 
                 OutlinedTextField(
                     value = certStatus,
                     onValueChange = { certStatus = it },
                     label = { Text("Status do Certificado Digital A1") },
+                    singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -460,6 +466,7 @@ fun NfseConfigForm(
                     value = apiToken,
                     onValueChange = { apiToken = it },
                     label = { Text("Token de API da Plataforma Fiscal") },
+                    singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -467,6 +474,7 @@ fun NfseConfigForm(
                     value = inscricaoMunicipal,
                     onValueChange = { inscricaoMunicipal = it },
                     label = { Text("Inscrição Municipal") },
+                    singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -474,6 +482,7 @@ fun NfseConfigForm(
                     value = regimeEspecial,
                     onValueChange = { regimeEspecial = it },
                     label = { Text("Regime Especial de Tributação") },
+                    singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -481,6 +490,7 @@ fun NfseConfigForm(
                     value = aliquotaIss,
                     onValueChange = { aliquotaIss = it },
                     label = { Text("Alíquota do ISS (%)") },
+                    singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -500,9 +510,9 @@ fun NfseConfigForm(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(44.dp)
                 .testTag("save_nfse_config_button"),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(8.dp)
         ) {
             Text("Salvar Configurações Fiscais", fontWeight = FontWeight.Bold)
         }
@@ -523,9 +533,9 @@ fun NfseGridCard(
                     onDoubleTap = { onPreview() }
                 )
             },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -539,7 +549,7 @@ fun NfseGridCard(
                 StatusBadgeChip(status = nfse.status)
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(3.dp))
 
             Text(
                 text = nfse.clientName,
@@ -554,7 +564,7 @@ fun NfseGridCard(
                 maxLines = 1
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(3.dp))
 
             Text(
                 text = MaskUtils.formatCurrency(nfse.price),
@@ -563,18 +573,18 @@ fun NfseGridCard(
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Row(
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(onClick = onPreview, modifier = Modifier.size(28.dp)) {
-                    Icon(Icons.Outlined.Visibility, contentDescription = "Visualizar Nota", modifier = Modifier.size(16.dp))
+                IconButton(onClick = onPreview, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Outlined.Visibility, contentDescription = "Visualizar Nota", modifier = Modifier.size(14.dp))
                 }
                 if (nfse.status == "EMITIDA") {
-                    IconButton(onClick = onCancel, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Outlined.Cancel, contentDescription = "Cancelar Nota", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                    IconButton(onClick = onCancel, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Outlined.Cancel, contentDescription = "Cancelar Nota", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(14.dp))
                     }
                 }
             }

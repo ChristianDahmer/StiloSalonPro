@@ -17,7 +17,9 @@ data class SalonSettingsEntity(
     val primaryColorHex: String = "#D81B60",
     val secondaryColorHex: String = "#AD1457",
     val accentColorHex: String = "#F06292",
-    val masterPassword: String = "1234"
+    val masterPassword: String = "1234",
+    val bottomNavOrder: String = "AGENDAMENTOS,CLIENTES,FINANCEIRO,WHATSAPP,NFSE,SERVICOS,PROFISSIONAIS,CONFIGURANCOES",
+    val headerBackgroundUri: String = "preset:hero_salon"
 )
 
 @Entity(tableName = "clients")

@@ -111,11 +111,11 @@ fun ClientsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(horizontal = 10.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text("Aniversariantes:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
+                    Text("Aniversariantes:", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
 
                     val months = listOf(
                         null to "Todos",
@@ -137,24 +137,25 @@ fun ClientsScreen(
                         FilterChip(
                             selected = selectedBirthMonth == m,
                             onClick = { selectedBirthMonth = m },
-                            label = { Text(name, fontSize = 12.sp, maxLines = 1, softWrap = false) }
+                            label = { Text(name, fontSize = 11.sp, maxLines = 1, softWrap = false) },
+                            modifier = Modifier.height(28.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             if (filteredClients.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp),
+                        .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     ElevatedCard(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.elevatedCardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                         )
@@ -162,11 +163,11 @@ fun ClientsScreen(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(24.dp)
+                            modifier = Modifier.padding(16.dp)
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(56.dp)
+                                    .size(48.dp)
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.primaryContainer),
                                 contentAlignment = Alignment.Center
@@ -175,35 +176,36 @@ fun ClientsScreen(
                                     imageVector = Icons.Outlined.People,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(28.dp)
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
                             Text(
                                 text = "Nenhum cliente cadastrado",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "Comece adicionando seu primeiro cliente para gerenciar agendamentos.",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
                             Button(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     clientToEdit = null
                                     showAddDialog = true
                                 },
-                                shape = RoundedCornerShape(10.dp)
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                             ) {
                                 Icon(Icons.Default.PersonAdd, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Cadastrar Cliente")
+                                Text("Cadastrar Cliente", fontSize = 13.sp)
                             }
                         }
                     }
@@ -212,9 +214,9 @@ fun ClientsScreen(
                 if (isGridView) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(filteredClients, key = { it.id }) { client ->
@@ -235,8 +237,8 @@ fun ClientsScreen(
                     }
                 } else {
                     LazyColumn(
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(filteredClients, key = { it.id }) { client ->
@@ -303,53 +305,58 @@ fun ClientListItem(
                     onDoubleTap = { onEdit() }
                 )
             },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = client.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
                 )
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(1.dp))
                 Text(
                     text = "CPF: ${client.cpf} • 📞 ${client.phone}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
                 )
                 Text(
                     text = "✉️ ${client.email} • 🎂 ${MaskUtils.formatDatePtBr(client.birthDate)}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline
+                    color = MaterialTheme.colorScheme.outline,
+                    maxLines = 1
                 )
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onWhatsAppBirthday) {
+                IconButton(onClick = onWhatsAppBirthday, modifier = Modifier.size(26.dp)) {
                     Icon(
                         Icons.Filled.Favorite,
                         contentDescription = "Enviar Cupom de Aniversário via WhatsApp",
-                        tint = Color(0xFF2E7D32)
+                        tint = Color(0xFF2E7D32),
+                        modifier = Modifier.size(15.dp)
                     )
                 }
-                IconButton(onClick = onCopy) {
+                IconButton(onClick = onCopy, modifier = Modifier.size(26.dp)) {
                     Icon(
                         Icons.Outlined.ContentCopy,
                         contentDescription = "Copiar Cliente",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(15.dp)
                     )
                 }
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Outlined.Edit, contentDescription = "Editar")
+                IconButton(onClick = onEdit, modifier = Modifier.size(26.dp)) {
+                    Icon(Icons.Outlined.Edit, contentDescription = "Editar", modifier = Modifier.size(15.dp))
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Outlined.Delete, contentDescription = "Excluir", tint = MaterialTheme.colorScheme.error)
+                IconButton(onClick = onDelete, modifier = Modifier.size(26.dp)) {
+                    Icon(Icons.Outlined.Delete, contentDescription = "Excluir", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(15.dp))
                 }
             }
         }
@@ -372,9 +379,9 @@ fun ClientGridCard(
                     onDoubleTap = { onEdit() }
                 )
             },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
             Text(
                 text = client.name,
                 style = MaterialTheme.typography.titleSmall,
@@ -384,50 +391,53 @@ fun ClientGridCard(
             Text(
                 text = client.phone,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             Text(
                 text = "CPF: ${client.cpf}",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline
+                color = MaterialTheme.colorScheme.outline,
+                maxLines = 1
             )
             Text(
                 text = "🎂 ${MaskUtils.formatDatePtBr(client.birthDate)}",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline
+                color = MaterialTheme.colorScheme.outline,
+                maxLines = 1
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Row(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(onClick = onWhatsAppBirthday, modifier = Modifier.size(28.dp)) {
+                IconButton(onClick = onWhatsAppBirthday, modifier = Modifier.size(24.dp)) {
                     Icon(
                         Icons.Filled.Favorite,
                         contentDescription = "Cupom Aniversário",
                         tint = Color(0xFF2E7D32),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(14.dp)
                     )
                 }
-                IconButton(onClick = onCopy, modifier = Modifier.size(28.dp)) {
+                IconButton(onClick = onCopy, modifier = Modifier.size(24.dp)) {
                     Icon(
                         Icons.Outlined.ContentCopy,
                         contentDescription = "Copiar Cliente",
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(14.dp)
                     )
                 }
-                IconButton(onClick = onEdit, modifier = Modifier.size(28.dp)) {
-                    Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
                 }
-                IconButton(onClick = onDelete, modifier = Modifier.size(28.dp)) {
-                    Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(14.dp))
                 }
             }
         }
@@ -461,7 +471,8 @@ fun ClientFormDialog(
                         title = {
                             Text(
                                 if (client == null) "Novo Cliente" else "Editar Cliente",
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium
                             )
                         },
                         navigationIcon = {
@@ -485,7 +496,8 @@ fun ClientFormDialog(
                                 enabled = name.isNotBlank() && phone.isNotBlank(),
                                 modifier = Modifier
                                     .padding(end = 8.dp)
-                                    .testTag("save_client_button")
+                                    .testTag("save_client_button"),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                             ) {
                                 Text("Salvar")
                             }
@@ -497,13 +509,13 @@ fun ClientFormDialog(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
-                        .padding(20.dp)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                         .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
                         text = "Informações do Cliente",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -512,6 +524,7 @@ fun ClientFormDialog(
                         value = name,
                         onValueChange = { name = it },
                         label = { Text("Nome Completo *") },
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -535,6 +548,7 @@ fun ClientFormDialog(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("E-mail") },
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -542,6 +556,7 @@ fun ClientFormDialog(
                         value = birthDate,
                         onValueChange = { birthDate = it },
                         label = { Text("Data de Nascimento (YYYY-MM-DD)") },
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

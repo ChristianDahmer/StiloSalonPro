@@ -191,37 +191,56 @@ fun FinanceScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 10.dp, vertical = 2.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                // Period Filters
+                // Period Filters + DRE Report Button
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = "Período:",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                    listOf(
-                        "ESTE_MES" to "Este Mês",
-                        "HOJE" to "Hoje",
-                        "MES_ANTERIOR" to "Mês Anterior",
-                        "TODOS" to "Tudo"
-                    ).forEach { (key, label) ->
-                        FilterChip(
-                            selected = periodFilter == key,
-                            onClick = { viewModel.setSelectedFinancePeriodFilter(key) },
-                            label = { Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false) },
-                            modifier = Modifier.testTag("filter_period_$key")
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Período:",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            softWrap = false
                         )
+                        listOf(
+                            "ESTE_MES" to "Este Mês",
+                            "HOJE" to "Hoje",
+                            "MES_ANTERIOR" to "Mês Anterior",
+                            "TODOS" to "Tudo"
+                        ).forEach { (key, label) ->
+                            FilterChip(
+                                selected = periodFilter == key,
+                                onClick = { viewModel.setSelectedFinancePeriodFilter(key) },
+                                label = { Text(label, style = MaterialTheme.typography.labelSmall, fontSize = 11.sp, maxLines = 1, softWrap = false) },
+                                modifier = Modifier.height(26.dp).testTag("filter_period_$key")
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    FilledTonalButton(
+                        onClick = { showDreReportDialog = true },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.height(28.dp),
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Icon(Icons.Default.Assessment, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text("DRE", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -230,12 +249,12 @@ fun FinanceScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Tipo:",
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -250,104 +269,34 @@ fun FinanceScreen(
                         FilterChip(
                             selected = (typeFilter ?: "TODAS") == key,
                             onClick = { viewModel.setSelectedFinanceTypeFilter(if (key == "TODAS") null else key) },
-                            label = { Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false) },
+                            label = { Text(label, style = MaterialTheme.typography.labelSmall, fontSize = 11.sp, maxLines = 1, softWrap = false) },
                             leadingIcon = {
                                 when (key) {
-                                    "RECEITA" -> Icon(Icons.Default.TrendingUp, contentDescription = null, tint = Color(0xFF2E7D32), modifier = Modifier.size(16.dp))
-                                    "DESPESA" -> Icon(Icons.Default.TrendingDown, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
-                                    "PENDENTE" -> Icon(Icons.Default.Schedule, contentDescription = null, tint = Color(0xFFE65100), modifier = Modifier.size(16.dp))
+                                    "RECEITA" -> Icon(Icons.Default.TrendingUp, contentDescription = null, tint = Color(0xFF2E7D32), modifier = Modifier.size(12.dp))
+                                    "DESPESA" -> Icon(Icons.Default.TrendingDown, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(12.dp))
+                                    "PENDENTE" -> Icon(Icons.Default.Schedule, contentDescription = null, tint = Color(0xFFE65100), modifier = Modifier.size(12.dp))
                                     else -> null
                                 }
                             },
-                            modifier = Modifier.testTag("filter_type_$key")
+                            modifier = Modifier.height(26.dp).testTag("filter_type_$key")
                         )
                     }
                 }
             }
 
-            // Quick Action Buttons Bar (Organized in 2 rows to ensure horizontal text without vertical wrapping)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            initialDialogType = "RECEITA"
-                            showAddDialog = true
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Nova Receita", fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
-                    }
-
-                    Button(
-                        onClick = {
-                            initialDialogType = "DESPESA"
-                            showAddDialog = true
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Icon(Icons.Default.RemoveCircle, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Nova Despesa", fontSize = 13.sp, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedButton(
-                        onClick = { viewModel.syncAppointmentsToFinancial(context) },
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Icon(Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Sinc. Agenda", fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1, softWrap = false)
-                    }
-
-                    FilledTonalButton(
-                        onClick = { showDreReportDialog = true },
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                        shape = RoundedCornerShape(10.dp)
-                    ) {
-                        Icon(Icons.Default.Assessment, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Relatório DRE", fontSize = 13.sp, fontWeight = FontWeight.Medium, maxLines = 1, softWrap = false)
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             // Main List or Grid Content
             if (filteredTransactions.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp),
+                        .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     ElevatedCard(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.elevatedCardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                         )
@@ -355,11 +304,11 @@ fun FinanceScreen(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(24.dp)
+                            modifier = Modifier.padding(16.dp)
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(56.dp)
+                                    .size(48.dp)
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.primaryContainer),
                                 contentAlignment = Alignment.Center
@@ -368,36 +317,23 @@ fun FinanceScreen(
                                     imageVector = Icons.Outlined.AccountBalanceWallet,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(28.dp)
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
                             Text(
                                 text = "Nenhum lançamento encontrado",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Ajuste os filtros acima ou registre novas entradas e saídas no caixa.",
-                                style = MaterialTheme.typography.bodyMedium,
+                                text = "Ajuste os filtros acima ou use o botão '+' para registrar movimentações no caixa.",
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    initialDialogType = "RECEITA"
-                                    showAddDialog = true
-                                },
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Lançar Receita Rápida")
-                            }
                         }
                     }
                 }
@@ -405,9 +341,9 @@ fun FinanceScreen(
                 if (isGridView) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 88.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(filteredTransactions, key = { it.id }) { item ->
@@ -422,8 +358,8 @@ fun FinanceScreen(
                     }
                 } else {
                     LazyColumn(
-                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 88.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(filteredTransactions, key = { it.id }) { item ->
@@ -496,14 +432,14 @@ fun FinancialSummaryCard(
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(20.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 4.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -528,16 +464,16 @@ fun FinancialSummaryCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             Text(
                 text = MaskUtils.formatCurrency(netBalance),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Income / Expense Row
             Row(
@@ -699,22 +635,24 @@ fun TransactionListItem(
             .pointerInput(transaction.id) {
                 detectTapGestures(onDoubleTap = { onEdit() })
             },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
                 modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Icon Box
                 Box(
                     modifier = Modifier
-                        .size(42.dp)
+                        .size(32.dp)
                         .clip(CircleShape)
                         .background(
                             if (!isPaid) Color(0xFFFFF3E0)
@@ -727,62 +665,60 @@ fun TransactionListItem(
                         imageVector = if (!isPaid) Icons.Default.Schedule else if (isIncome) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
                         contentDescription = null,
                         tint = if (!isPaid) Color(0xFFE65100) else if (isIncome) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                 }
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = transaction.description,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    Text(
+                        text = transaction.description,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
 
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(1.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Surface(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = RoundedCornerShape(4.dp),
                             color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Text(
                                 text = transaction.category,
                                 style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                fontSize = 10.sp,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                             )
                         }
 
                         Surface(
-                            shape = RoundedCornerShape(6.dp),
+                            shape = RoundedCornerShape(4.dp),
                             color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Text(
                                 text = transaction.paymentMethod,
                                 style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                fontSize = 10.sp,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                             )
                         }
 
                         Text(
                             text = MaskUtils.formatDatePtBr(transaction.date),
                             style = MaterialTheme.typography.labelSmall,
+                            fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(6.dp))
 
             Column(
                 horizontalAlignment = Alignment.End,
@@ -795,26 +731,30 @@ fun TransactionListItem(
                     color = if (!isPaid) Color(0xFFE65100) else if (isIncome) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     AssistChip(
                         onClick = onToggleStatus,
-                        label = { Text(if (isPaid) "PAGO" else "PENDENTE", fontSize = 10.sp) },
+                        label = { Text(if (isPaid) "PAGO" else "PENDENTE", fontSize = 9.sp) },
                         colors = AssistChipDefaults.assistChipColors(
                             containerColor = if (isPaid) Color(0xFFE8F5E9) else Color(0xFFFFF3E0),
                             labelColor = if (isPaid) Color(0xFF2E7D32) else Color(0xFFE65100)
                         ),
                         border = null,
-                        modifier = Modifier.height(24.dp)
+                        modifier = Modifier.height(20.dp)
                     )
 
-                    IconButton(onClick = onEdit, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Outlined.Edit, contentDescription = "Editar", modifier = Modifier.size(16.dp))
+                    IconButton(onClick = onDuplicate, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Outlined.ContentCopy, contentDescription = "Duplicar", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(13.dp))
                     }
 
-                    IconButton(onClick = onDelete, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Outlined.Delete, contentDescription = "Excluir", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                    IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Outlined.Edit, contentDescription = "Editar", modifier = Modifier.size(13.dp))
+                    }
+
+                    IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Outlined.Delete, contentDescription = "Excluir", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(13.dp))
                     }
                 }
             }
@@ -839,9 +779,9 @@ fun TransactionGridCard(
             .pointerInput(transaction.id) {
                 detectTapGestures(onDoubleTap = { onEdit() })
             },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -852,19 +792,19 @@ fun TransactionGridCard(
                     color = if (!isPaid) Color(0xFFFFF3E0) else if (isIncome) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = if (isIncome) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
                             contentDescription = null,
                             tint = if (isIncome) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(12.dp)
+                            modifier = Modifier.size(10.dp)
                         )
                         Spacer(modifier = Modifier.width(2.dp))
                         Text(
                             text = transaction.type,
-                            fontSize = 10.sp,
+                            fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (isIncome) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error
                         )
@@ -873,45 +813,44 @@ fun TransactionGridCard(
 
                 AssistChip(
                     onClick = onToggleStatus,
-                    label = { Text(if (isPaid) "PAGO" else "PENDENTE", fontSize = 9.sp) },
+                    label = { Text(if (isPaid) "PAGO" else "PENDENTE", fontSize = 8.sp) },
                     colors = AssistChipDefaults.assistChipColors(
                         containerColor = if (isPaid) Color(0xFFE8F5E9) else Color(0xFFFFF3E0),
                         labelColor = if (isPaid) Color(0xFF2E7D32) else Color(0xFFE65100)
                     ),
                     border = null,
-                    modifier = Modifier.height(20.dp)
+                    modifier = Modifier.height(18.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(3.dp))
 
             Text(
                 text = transaction.description,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-
-            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = "${transaction.category} • ${transaction.paymentMethod}",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 10.sp,
                 maxLines = 1
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(3.dp))
 
             Text(
                 text = MaskUtils.formatCurrency(transaction.amount),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = if (!isPaid) Color(0xFFE65100) else if (isIncome) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(3.dp))
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -921,15 +860,19 @@ fun TransactionGridCard(
                 Text(
                     text = MaskUtils.formatDatePtBr(transaction.date),
                     style = MaterialTheme.typography.labelSmall,
+                    fontSize = 9.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Row {
-                    IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Outlined.Edit, contentDescription = "Editar", modifier = Modifier.size(14.dp))
+                    IconButton(onClick = onDuplicate, modifier = Modifier.size(22.dp)) {
+                        Icon(Icons.Outlined.ContentCopy, contentDescription = "Duplicar", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(12.dp))
                     }
-                    IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Outlined.Delete, contentDescription = "Excluir", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(14.dp))
+                    IconButton(onClick = onEdit, modifier = Modifier.size(22.dp)) {
+                        Icon(Icons.Outlined.Edit, contentDescription = "Editar", modifier = Modifier.size(12.dp))
+                    }
+                    IconButton(onClick = onDelete, modifier = Modifier.size(22.dp)) {
+                        Icon(Icons.Outlined.Delete, contentDescription = "Excluir", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(12.dp))
                     }
                 }
             }
@@ -979,7 +922,8 @@ fun AddEditTransactionDialog(
                         title = {
                             Text(
                                 if (initialTransaction == null) "Novo Lançamento no Caixa" else "Editar Lançamento",
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium
                             )
                         },
                         navigationIcon = {
@@ -1011,7 +955,8 @@ fun AddEditTransactionDialog(
                                 },
                                 modifier = Modifier
                                     .padding(end = 8.dp)
-                                    .testTag("btn_save_finance")
+                                    .testTag("btn_save_finance"),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                             ) {
                                 Text("Salvar")
                             }
@@ -1023,9 +968,9 @@ fun AddEditTransactionDialog(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
-                        .padding(20.dp)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                         .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     // Type Selector (RECEITA / DESPESA)
                     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
@@ -1037,7 +982,7 @@ fun AddEditTransactionDialog(
                             },
                             shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
                         ) {
-                            Text("Receita (Entrada)")
+                            Text("Receita (Entrada)", fontSize = 12.sp)
                         }
                         SegmentedButton(
                             selected = type == "DESPESA",
@@ -1047,7 +992,7 @@ fun AddEditTransactionDialog(
                             },
                             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
                         ) {
-                            Text("Despesa (Saída)")
+                            Text("Despesa (Saída)", fontSize = 12.sp)
                         }
                     }
 
@@ -1109,7 +1054,7 @@ fun AddEditTransactionDialog(
                     // Date & Payment Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         OutlinedTextField(
                             value = date,
@@ -1158,6 +1103,7 @@ fun AddEditTransactionDialog(
                         Text(
                             text = if (status == "PAGO") "Lançamento PAGO / Efetivado" else "Lançamento PENDENTE",
                             fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = if (status == "PAGO") Color(0xFF2E7D32) else Color(0xFFE65100)
                         )
                         Switch(

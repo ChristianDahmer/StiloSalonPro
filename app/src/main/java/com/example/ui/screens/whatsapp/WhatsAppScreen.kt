@@ -23,6 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -68,14 +69,14 @@ fun WhatsAppScreen(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(horizontal = 10.dp, vertical = 4.dp),
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(10.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                    .padding(horizontal = 10.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -85,7 +86,7 @@ fun WhatsAppScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(26.dp)
                             .background(Color(0xFF25D366).copy(alpha = 0.15f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
@@ -93,10 +94,10 @@ fun WhatsAppScreen(
                             painter = painterResource(id = R.drawable.ic_whatsapp),
                             contentDescription = "WhatsApp Logo",
                             tint = Color.Unspecified,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
@@ -104,26 +105,26 @@ fun WhatsAppScreen(
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Surface(
                                 color = Color(0xFFE8F5E9),
-                                shape = RoundedCornerShape(8.dp)
+                                shape = RoundedCornerShape(6.dp)
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .size(6.dp)
+                                            .size(5.dp)
                                             .background(Color(0xFF2E7D32), CircleShape)
                                     )
-                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Spacer(modifier = Modifier.width(2.dp))
                                     Text(
                                         text = "IA Ativa",
                                         color = Color(0xFF2E7D32),
                                         style = MaterialTheme.typography.labelSmall,
-                                        fontSize = 10.sp,
+                                        fontSize = 9.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -132,25 +133,26 @@ fun WhatsAppScreen(
                         Text(
                             text = "Monitoramento inteligente de clientes",
                             style = MaterialTheme.typography.labelSmall,
+                            fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
 
                 OutlinedButton(
                     onClick = { showAiConfigDialog = true },
                     modifier = Modifier.testTag("ai_config_button"),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 1.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Settings,
                         contentDescription = "Configurações IA",
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(12.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Configurar IA", style = MaterialTheme.typography.labelSmall)
+                    Spacer(modifier = Modifier.width(3.dp))
+                    Text("Configurar IA", style = MaterialTheme.typography.labelSmall, fontSize = 10.sp)
                 }
             }
         }
@@ -158,7 +160,7 @@ fun WhatsAppScreen(
         // Tab Navigation
         ScrollableTabRow(
             selectedTabIndex = selectedTab,
-            edgePadding = 16.dp,
+            edgePadding = 8.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
             Tab(
@@ -166,16 +168,16 @@ fun WhatsAppScreen(
                 onClick = { selectedTab = 0 },
                 text = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Monitor IA (Entrada)")
+                        Text("Monitor IA", fontSize = 12.sp)
                         if (pendingInboundCount > 0) {
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Badge(containerColor = MaterialTheme.colorScheme.error) {
                                 Text("$pendingInboundCount")
                             }
                         }
                     }
                 },
-                icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null) }
+                icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp)) }
             )
 
             Tab(
@@ -183,65 +185,65 @@ fun WhatsAppScreen(
                 onClick = { selectedTab = 1 },
                 text = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Notificações Equipe")
+                        Text("Notificações", fontSize = 12.sp)
                         if (unreadNotificationsCount > 0) {
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Badge(containerColor = MaterialTheme.colorScheme.primary) {
                                 Text("$unreadNotificationsCount")
                             }
                         }
                     }
                 },
-                icon = { Icon(Icons.Default.NotificationsActive, contentDescription = null) }
+                icon = { Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(18.dp)) }
             )
 
             Tab(
                 selected = selectedTab == 2,
                 onClick = { selectedTab = 2 },
-                text = { Text("Modelos (${templates.size})") },
-                icon = { Icon(Icons.Outlined.TextSnippet, contentDescription = null) }
+                text = { Text("Modelos (${templates.size})", fontSize = 12.sp) },
+                icon = { Icon(Icons.Outlined.TextSnippet, contentDescription = null, modifier = Modifier.size(18.dp)) }
             )
 
             Tab(
                 selected = selectedTab == 3,
                 onClick = { selectedTab = 3 },
-                text = { Text("Campanhas") },
-                icon = { Icon(Icons.Outlined.Campaign, contentDescription = null) }
+                text = { Text("Campanhas", fontSize = 12.sp) },
+                icon = { Icon(Icons.Outlined.Campaign, contentDescription = null, modifier = Modifier.size(18.dp)) }
             )
 
             Tab(
                 selected = selectedTab == 4,
                 onClick = { selectedTab = 4 },
-                text = { Text("Histórico (${logs.size})") },
-                icon = { Icon(Icons.Outlined.History, contentDescription = null) }
+                text = { Text("Histórico (${logs.size})", fontSize = 12.sp) },
+                icon = { Icon(Icons.Outlined.History, contentDescription = null, modifier = Modifier.size(18.dp)) }
             )
 
             Tab(
                 selected = selectedTab == 5,
                 onClick = { selectedTab = 5 },
-                text = { Text("Configurações IA") },
-                icon = { Icon(Icons.Outlined.Tune, contentDescription = null) }
+                text = { Text("Configurações IA", fontSize = 12.sp) },
+                icon = { Icon(Icons.Outlined.Tune, contentDescription = null, modifier = Modifier.size(18.dp)) }
             )
 
             Tab(
                 selected = selectedTab == 6,
                 onClick = { selectedTab = 6 },
-                text = { Text("Fila de Espera") },
-                icon = { Icon(Icons.Outlined.People, contentDescription = null) }
+                text = { Text("Fila de Espera", fontSize = 12.sp) },
+                icon = { Icon(Icons.Outlined.People, contentDescription = null, modifier = Modifier.size(18.dp)) }
             )
 
             Tab(
                 selected = selectedTab == 7,
                 onClick = { selectedTab = 7 },
-                text = { Text("Clube VIP") },
-                icon = { Icon(Icons.Outlined.Star, contentDescription = null) }
+                text = { Text("Clube VIP", fontSize = 12.sp) },
+                icon = { Icon(Icons.Outlined.Star, contentDescription = null, modifier = Modifier.size(18.dp)) }
             )
 
             Tab(
                 selected = selectedTab == 8,
                 onClick = { selectedTab = 8 },
-                text = { Text("Comandos de Voz") },
-                icon = { Icon(Icons.Outlined.Mic, contentDescription = null) }
+                text = { Text("Comandos de Voz", fontSize = 12.sp) },
+                icon = { Icon(Icons.Outlined.Mic, contentDescription = null, modifier = Modifier.size(18.dp)) }
             )
         }
 
@@ -392,8 +394,8 @@ fun WhatsAppAiMonitorTab(
     onUpdateSuggestedReply: (WhatsAppInboundMessageEntity, String) -> Unit
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxSize()
     ) {
         // Quick Action Bar (Compact Header)
@@ -401,9 +403,9 @@ fun WhatsAppAiMonitorTab(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(10.dp)
             ) {
-                Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -418,36 +420,37 @@ fun WhatsAppAiMonitorTab(
                             Text(
                                 text = "Captura e analisa automaticamente mensagens recebidas no WhatsApp",
                                 style = MaterialTheme.typography.labelSmall,
+                                fontSize = 10.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
 
                         Button(
                             onClick = onSimulateClick,
                             modifier = Modifier.testTag("simulate_incoming_button"),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                         ) {
-                            Icon(Icons.Default.AddComment, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Simular Mensagem", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                            Icon(Icons.Default.AddComment, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text("Simular Mensagem", style = MaterialTheme.typography.labelSmall, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                         }
                     }
 
                     if (isAiProcessing) {
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
-                                .padding(8.dp)
+                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(6.dp))
+                                .padding(6.dp)
                         ) {
-                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                            Spacer(modifier = Modifier.width(8.dp))
+                            CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "IA processando mensagem recebida...",
                                 style = MaterialTheme.typography.labelSmall,
@@ -464,17 +467,17 @@ fun WhatsAppAiMonitorTab(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(48.dp),
+                        .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             Icons.Outlined.MarkChatUnread,
                             contentDescription = null,
-                            modifier = Modifier.size(56.dp),
+                            modifier = Modifier.size(40.dp),
                             tint = MaterialTheme.colorScheme.outline
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             "Nenhuma mensagem de entrada no momento.",
                             style = MaterialTheme.typography.titleSmall,
@@ -557,9 +560,9 @@ fun InboundMessageAiCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("inbound_card_${message.id}"),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             // Header: Sender & Status
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -569,26 +572,28 @@ fun InboundMessageAiCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(32.dp)
                             .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = message.senderName.take(1).uppercase(),
                             fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
                             text = message.senderName,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = "${message.senderPhone} • $timeFormatted",
                             style = MaterialTheme.typography.labelSmall,
+                            fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -596,14 +601,15 @@ fun InboundMessageAiCard(
 
                 Surface(
                     color = statusBg,
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(6.dp)
                 ) {
                     Text(
                         text = statusLabel,
                         color = statusColor,
                         style = MaterialTheme.typography.labelSmall,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
             }
@@ -612,20 +618,20 @@ fun InboundMessageAiCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFDCF8C6).copy(alpha = 0.6f), RoundedCornerShape(12.dp))
-                    .padding(12.dp)
+                    .background(Color(0xFFDCF8C6).copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                    .padding(8.dp)
             ) {
                 Row(verticalAlignment = Alignment.Top) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_whatsapp),
                         contentDescription = null,
                         tint = Color(0xFF075E54),
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "\"${message.rawMessage}\"",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF075E54),
                         fontWeight = FontWeight.Medium
                     )
@@ -637,9 +643,9 @@ fun InboundMessageAiCard(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -650,39 +656,41 @@ fun InboundMessageAiCard(
                                 Icons.Default.AutoAwesome,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(15.dp)
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 "Análise IA",
-                                style = MaterialTheme.typography.titleSmall,
+                                style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             Surface(
                                 color = MaterialTheme.colorScheme.secondaryContainer,
-                                shape = RoundedCornerShape(6.dp)
+                                shape = RoundedCornerShape(4.dp)
                             ) {
                                 Text(
                                     text = intentLabel,
                                     style = MaterialTheme.typography.labelSmall,
+                                    fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                                 )
                             }
                             Surface(
                                 color = Color(0xFFE3F2FD),
-                                shape = RoundedCornerShape(6.dp)
+                                shape = RoundedCornerShape(4.dp)
                             ) {
                                 Text(
-                                    text = "${(message.confidenceScore * 100).toInt()}% Confiança",
+                                    text = "${(message.confidenceScore * 100).toInt()}%",
                                     color = Color(0xFF1565C0),
                                     style = MaterialTheme.typography.labelSmall,
+                                    fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                                 )
                             }
                         }
@@ -693,7 +701,7 @@ fun InboundMessageAiCard(
                     // Extracted Entities Grid
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Serviço Detectado:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                            Text("Serviço Detectado:", style = MaterialTheme.typography.labelSmall, fontSize = 9.sp, color = MaterialTheme.colorScheme.outline)
                             Text(
                                 text = message.extractedServiceName.ifBlank { "Não especificado" },
                                 style = MaterialTheme.typography.bodySmall,
@@ -701,7 +709,7 @@ fun InboundMessageAiCard(
                             )
                         }
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Profissional Solicitada:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                            Text("Profissional Solicitada:", style = MaterialTheme.typography.labelSmall, fontSize = 9.sp, color = MaterialTheme.colorScheme.outline)
                             Text(
                                 text = message.extractedProfessionalName.ifBlank { "Equipe Geral" },
                                 style = MaterialTheme.typography.bodySmall,
@@ -713,7 +721,7 @@ fun InboundMessageAiCard(
 
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Data Solicitada:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                            Text("Data Solicitada:", style = MaterialTheme.typography.labelSmall, fontSize = 9.sp, color = MaterialTheme.colorScheme.outline)
                             Text(
                                 text = MaskUtils.formatDatePtBr(message.extractedDate),
                                 style = MaterialTheme.typography.bodySmall,
@@ -721,7 +729,7 @@ fun InboundMessageAiCard(
                             )
                         }
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Horário Solicitado:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                            Text("Horário Solicitado:", style = MaterialTheme.typography.labelSmall, fontSize = 9.sp, color = MaterialTheme.colorScheme.outline)
                             Text(
                                 text = message.extractedTime.ifBlank { "--:--" },
                                 style = MaterialTheme.typography.bodySmall,
@@ -734,6 +742,7 @@ fun InboundMessageAiCard(
                         Text(
                             text = "💡 Observação IA: ${message.notes}",
                             style = MaterialTheme.typography.labelSmall,
+                            fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -759,26 +768,27 @@ fun InboundMessageAiCard(
 
                     Surface(
                         color = preServiceBadgeBg,
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
                             text = preServiceBadgeText,
                             color = preServiceBadgeColor,
                             style = MaterialTheme.typography.labelSmall,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
                         )
                     }
 
                     if (message.suggestedReply.isNotBlank()) {
                         Surface(
                             color = MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(6.dp),
                             border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Column(modifier = Modifier.padding(10.dp)) {
+                            Column(modifier = Modifier.padding(8.dp)) {
                                 if (isEditingReply) {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
@@ -791,19 +801,19 @@ fun InboundMessageAiCard(
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary
                                         )
-                                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                             IconButton(
                                                 onClick = {
                                                     isEditingReply = false
                                                     editedReplyText = message.suggestedReply
                                                 },
-                                                modifier = Modifier.size(24.dp)
+                                                modifier = Modifier.size(22.dp)
                                             ) {
                                                 Icon(
                                                     Icons.Default.Close,
                                                     contentDescription = "Cancelar",
                                                     tint = MaterialTheme.colorScheme.error,
-                                                    modifier = Modifier.size(16.dp)
+                                                    modifier = Modifier.size(14.dp)
                                                 )
                                             }
                                             IconButton(
@@ -812,24 +822,24 @@ fun InboundMessageAiCard(
                                                     isEditingReply = false
                                                 },
                                                 enabled = editedReplyText.isNotBlank(),
-                                                modifier = Modifier.size(24.dp)
+                                                modifier = Modifier.size(22.dp)
                                             ) {
                                                 Icon(
                                                     Icons.Default.Check,
                                                     contentDescription = "Salvar",
                                                     tint = Color(0xFF2E7D32),
-                                                    modifier = Modifier.size(16.dp)
+                                                    modifier = Modifier.size(14.dp)
                                                 )
                                             }
                                         }
                                     }
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Spacer(modifier = Modifier.height(2.dp))
                                     OutlinedTextField(
                                         value = editedReplyText,
                                         onValueChange = { editedReplyText = it },
                                         modifier = Modifier.fillMaxWidth(),
                                         textStyle = MaterialTheme.typography.bodySmall,
-                                        maxLines = 5,
+                                        maxLines = 4,
                                         minLines = 2
                                     )
                                 } else {
@@ -844,27 +854,27 @@ fun InboundMessageAiCard(
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary
                                         )
-                                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                                             IconButton(
                                                 onClick = { isEditingReply = true },
-                                                modifier = Modifier.size(24.dp)
+                                                modifier = Modifier.size(22.dp)
                                             ) {
                                                 Icon(
                                                     Icons.Outlined.Edit,
                                                     contentDescription = "Editar Resposta",
                                                     tint = MaterialTheme.colorScheme.outline,
-                                                    modifier = Modifier.size(16.dp)
+                                                    modifier = Modifier.size(14.dp)
                                                 )
                                             }
                                             IconButton(
                                                 onClick = onReplyClient,
-                                                modifier = Modifier.size(24.dp)
+                                                modifier = Modifier.size(22.dp)
                                             ) {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_whatsapp),
                                                     contentDescription = "Enviar no WhatsApp",
                                                     tint = Color(0xFF075E54),
-                                                    modifier = Modifier.size(18.dp)
+                                                    modifier = Modifier.size(16.dp)
                                                 )
                                             }
                                         }
@@ -884,60 +894,64 @@ fun InboundMessageAiCard(
             // Action Buttons
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 if (message.status == "PENDENTE") {
                     Button(
                         onClick = onApprove,
                         modifier = Modifier.testTag("approve_booking_button_${message.id}"),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Aprovar & Agendar", fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1, softWrap = false)
+                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text("Aprovar & Agendar", fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1, softWrap = false)
                     }
 
                     OutlinedButton(
                         onClick = onReplyClient,
                         modifier = Modifier.testTag("reply_client_button_${message.id}"),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(14.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Responder", fontSize = 12.sp, maxLines = 1, softWrap = false)
+                        Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(12.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text("Responder", fontSize = 11.sp, maxLines = 1, softWrap = false)
                     }
 
-                    IconButton(onClick = onReject, modifier = Modifier.size(36.dp)) {
-                        Icon(Icons.Default.Close, contentDescription = "Recusar", tint = MaterialTheme.colorScheme.error)
+                    IconButton(onClick = onReject, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.Close, contentDescription = "Recusar", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
                     }
                 } else {
                     OutlinedButton(
                         onClick = onNotifyProfessional,
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_whatsapp),
                             contentDescription = null,
                             tint = Color.Unspecified,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(14.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Notificar Profissional no WhatsApp", fontSize = 12.sp, maxLines = 1, softWrap = false)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Notificar Profissional", fontSize = 11.sp, maxLines = 1, softWrap = false)
                     }
 
                     OutlinedButton(
                         onClick = onReplyClient,
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Responder Cliente", fontSize = 12.sp, maxLines = 1, softWrap = false)
+                        Text("Responder Cliente", fontSize = 11.sp, maxLines = 1, softWrap = false)
                     }
 
-                    IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
-                        Icon(Icons.Outlined.Delete, contentDescription = "Excluir", tint = MaterialTheme.colorScheme.error)
+                    IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Outlined.Delete, contentDescription = "Excluir", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -958,8 +972,8 @@ fun ProfessionalNotificationsTab(
     onSendWhatsAppAlert: (ProfessionalNotificationEntity) -> Unit
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxSize()
     ) {
         item {
@@ -971,21 +985,22 @@ fun ProfessionalNotificationsTab(
                 Column {
                     Text(
                         text = "Notificações aos Profissionais",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "Alertas sobre agendamentos de clientes via WhatsApp",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 10.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
                 if (notifications.any { !it.isRead }) {
-                    TextButton(onClick = onMarkAllRead) {
-                        Icon(Icons.Default.DoneAll, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Marcar lidas")
+                    TextButton(onClick = onMarkAllRead, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)) {
+                        Icon(Icons.Default.DoneAll, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text("Marcar lidas", fontSize = 11.sp)
                     }
                 }
             }
@@ -996,7 +1011,7 @@ fun ProfessionalNotificationsTab(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(48.dp),
+                        .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text("Nenhuma notificação enviada à equipe ainda.", style = MaterialTheme.typography.bodyMedium)
@@ -1012,12 +1027,12 @@ fun ProfessionalNotificationsTab(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onMarkRead(notif.id) },
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(10.dp),
                     colors = CardDefaults.elevatedCardColors(
                         containerColor = if (!notif.isRead) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surface
                     )
                 ) {
-                    Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -1026,7 +1041,7 @@ fun ProfessionalNotificationsTab(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Box(
                                     modifier = Modifier
-                                        .size(36.dp)
+                                        .size(30.dp)
                                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -1034,10 +1049,10 @@ fun ProfessionalNotificationsTab(
                                         Icons.Default.Person,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(16.dp)
                                     )
                                 }
-                                Spacer(modifier = Modifier.width(10.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Column {
                                     Text(
                                         text = notif.professionalName,
@@ -1047,6 +1062,7 @@ fun ProfessionalNotificationsTab(
                                     Text(
                                         text = "${notif.professionalPhone} • $timeFormatted",
                                         style = MaterialTheme.typography.labelSmall,
+                                        fontSize = 10.sp,
                                         color = MaterialTheme.colorScheme.outline
                                     )
                                 }
@@ -1054,21 +1070,21 @@ fun ProfessionalNotificationsTab(
 
                             if (!notif.isRead) {
                                 Badge(containerColor = MaterialTheme.colorScheme.primary) {
-                                    Text("Nova", modifier = Modifier.padding(2.dp))
+                                    Text("Nova", modifier = Modifier.padding(2.dp), fontSize = 9.sp)
                                 }
                             }
                         }
 
                         Text(
                             text = notif.title,
-                            style = MaterialTheme.typography.labelLarge,
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
 
                         Text(
                             text = notif.message,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodySmall
                         )
 
                         Row(
@@ -1079,20 +1095,22 @@ fun ProfessionalNotificationsTab(
                             Button(
                                 onClick = { onSendWhatsAppAlert(notif) },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
-                                modifier = Modifier.testTag("send_whatsapp_alert_${notif.id}")
+                                modifier = Modifier.testTag("send_whatsapp_alert_${notif.id}"),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                shape = RoundedCornerShape(8.dp)
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_whatsapp),
                                     contentDescription = null,
                                     tint = Color.Unspecified,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(14.dp)
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Avisar no WhatsApp", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Avisar no WhatsApp", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                             }
 
-                            IconButton(onClick = { onDelete(notif) }) {
-                                Icon(Icons.Outlined.Delete, contentDescription = "Remover", tint = MaterialTheme.colorScheme.outline)
+                            IconButton(onClick = { onDelete(notif) }, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Outlined.Delete, contentDescription = "Remover", tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(18.dp))
                             }
                         }
                     }
@@ -1435,15 +1453,16 @@ fun WhatsAppTemplatesTab(
     onDeleteTemplate: (WhatsAppTemplateEntity) -> Unit
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxSize()
     ) {
         item {
             Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                shape = RoundedCornerShape(10.dp)
             ) {
-                Column(modifier = Modifier.padding(14.dp)) {
+                Column(modifier = Modifier.padding(10.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -1454,20 +1473,21 @@ fun WhatsAppTemplatesTab(
                             Text(
                                 "Variáveis: {nome_cliente}, {data}, {horario}, {servico}, {nome_profissional}, {nome_salao}",
                                 style = MaterialTheme.typography.bodySmall,
+                                fontSize = 10.sp,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
 
                         Button(
                             onClick = onCreateNewTemplate,
                             shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Novo Modelo", style = MaterialTheme.typography.labelSmall)
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text("Novo Modelo", style = MaterialTheme.typography.labelSmall, fontSize = 11.sp)
                         }
                     }
                 }
@@ -1477,9 +1497,9 @@ fun WhatsAppTemplatesTab(
         items(templates, key = { it.id }) { template ->
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(10.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(10.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -1488,10 +1508,10 @@ fun WhatsAppTemplatesTab(
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                             Text(
                                 text = template.title,
-                                style = MaterialTheme.typography.titleMedium,
+                                style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
                             val typeLabel = when (template.type) {
                                 "CONFIRMATION" -> "Confirmação"
                                 "REMINDER" -> "Lembrete"
@@ -1501,37 +1521,38 @@ fun WhatsAppTemplatesTab(
                             }
                             Surface(
                                 color = MaterialTheme.colorScheme.secondaryContainer,
-                                shape = RoundedCornerShape(6.dp)
+                                shape = RoundedCornerShape(4.dp)
                             ) {
                                 Text(
                                     text = typeLabel,
                                     style = MaterialTheme.typography.labelSmall,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    fontSize = 9.sp,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                                 )
                             }
                         }
 
                         Row {
-                            IconButton(onClick = { onEditTemplate(template) }) {
-                                Icon(Icons.Outlined.Edit, contentDescription = "Editar Modelo")
+                            IconButton(onClick = { onEditTemplate(template) }, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Outlined.Edit, contentDescription = "Editar Modelo", modifier = Modifier.size(16.dp))
                             }
-                            IconButton(onClick = { onDeleteTemplate(template) }) {
-                                Icon(Icons.Outlined.Delete, contentDescription = "Excluir Modelo", tint = MaterialTheme.colorScheme.error)
+                            IconButton(onClick = { onDeleteTemplate(template) }, modifier = Modifier.size(32.dp)) {
+                                Icon(Icons.Outlined.Delete, contentDescription = "Excluir Modelo", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                            .padding(12.dp)
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
+                            .padding(8.dp)
                     ) {
                         Text(
                             text = template.templateText,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }
@@ -1562,27 +1583,27 @@ fun WhatsAppTemplateEditDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(if (template.id == 0L) "Cadastrar Novo Modelo" else "Editar Modelo")
+            Text(if (template.id == 0L) "Cadastrar Novo Modelo" else "Editar Modelo", style = MaterialTheme.typography.titleMedium)
         },
         text = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Título / Nome do Modelo") },
-                    placeholder = { Text("Ex: Lembrete de Retorno, Boas-Vindas...") },
+                    label = { Text("Título / Nome do Modelo", fontSize = 12.sp) },
+                    placeholder = { Text("Ex: Lembrete de Retorno...") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
 
-                Text("Categoria do Modelo:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
+                Text("Categoria:", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -1590,7 +1611,7 @@ fun WhatsAppTemplateEditDialog(
                         FilterChip(
                             selected = selectedType == key,
                             onClick = { selectedType = key },
-                            label = { Text(label, fontSize = 12.sp, maxLines = 1, softWrap = false) }
+                            label = { Text(label, fontSize = 10.sp, maxLines = 1, softWrap = false) }
                         )
                     }
                 }
@@ -1600,14 +1621,15 @@ fun WhatsAppTemplateEditDialog(
                     onValueChange = { templateText = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(140.dp),
-                    label = { Text("Texto da Mensagem") },
+                        .height(110.dp),
+                    label = { Text("Texto da Mensagem", fontSize = 12.sp) },
                     minLines = 3
                 )
 
                 Text(
-                    text = "Variáveis suportadas: {nome_cliente}, {data}, {horario}, {servico}, {nome_profissional}, {nome_salao}",
+                    text = "Variáveis: {nome_cliente}, {data}, {horario}, {servico}, {nome_profissional}, {nome_salao}",
                     style = MaterialTheme.typography.labelSmall,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.outline
                 )
             }
@@ -1624,29 +1646,33 @@ fun WhatsAppTemplateEditDialog(
                     )
                 },
                 enabled = title.isNotBlank() && templateText.isNotBlank(),
-                modifier = Modifier.testTag("save_template_button")
+                modifier = Modifier.testTag("save_template_button"),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(if (template.id == 0L) "Cadastrar Modelo" else "Salvar Modelo")
+                Text(if (template.id == 0L) "Cadastrar" else "Salvar", fontSize = 12.sp)
             }
         },
         dismissButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (template.id != 0L) {
                     TextButton(
                         onClick = { onDelete(template) },
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Text("Excluir")
+                        Text("Excluir", fontSize = 12.sp)
                     }
                 }
                 OutlinedButton(
                     onClick = onDismiss,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Cancelar")
+                    Text("Cancelar", fontSize = 12.sp)
                 }
             }
         }
@@ -1693,13 +1719,13 @@ fun WhatsAppCampaignTab(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        ElevatedCard(shape = RoundedCornerShape(16.dp)) {
+        ElevatedCard(shape = RoundedCornerShape(10.dp)) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                modifier = Modifier.padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1707,35 +1733,36 @@ fun WhatsAppCampaignTab(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Outlined.Campaign, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(Icons.Outlined.Campaign, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "Campanhas Cadastradas (${promotionalTemplates.size})",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
                     Button(
                         onClick = { showCreateDialog = true },
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 3.dp),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Cadastrar Nova Campanha", style = MaterialTheme.typography.labelSmall)
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text("Cadastrar Campanha", style = MaterialTheme.typography.labelSmall, fontSize = 11.sp)
                     }
                 }
 
                 Text(
                     text = "Selecione uma das campanhas cadastradas ou crie novas versões personalizadas para disparo:",
                     style = MaterialTheme.typography.bodySmall,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 if (promotionalTemplates.isNotEmpty()) {
                     LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -1748,9 +1775,9 @@ fun WhatsAppCampaignTab(
                                     campaignTitle = template.title
                                     campaignMessage = template.templateText
                                 },
-                                label = { Text(template.title, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal, maxLines = 1, softWrap = false) },
+                                label = { Text(template.title, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal, fontSize = 11.sp, maxLines = 1, softWrap = false) },
                                 leadingIcon = if (isSelected) {
-                                    { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                                    { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp)) }
                                 } else null
                             )
                         }
@@ -1758,14 +1785,15 @@ fun WhatsAppCampaignTab(
                 } else {
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(6.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
                             text = "Nenhuma campanha cadastrada ainda. Clique no botão acima para cadastrar!",
                             style = MaterialTheme.typography.bodySmall,
+                            fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.outline,
-                            modifier = Modifier.padding(12.dp)
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
                 }
@@ -1775,44 +1803,45 @@ fun WhatsAppCampaignTab(
                 OutlinedTextField(
                     value = campaignTitle,
                     onValueChange = { campaignTitle = it },
-                    label = { Text("Nome da Campanha Selecionada") },
+                    label = { Text("Nome da Campanha Selecionada", fontSize = 12.sp) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
 
-                Text("Segmentação do Público-Alvo:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
+                Text("Segmentação do Público-Alvo:", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     FilterChip(
                         selected = segmentFilter == "ANIVERSARIANTES",
                         onClick = { segmentFilter = "ANIVERSARIANTES" },
-                        label = { Text("Aniversariantes (${targetClients.size})", maxLines = 1, softWrap = false) }
+                        label = { Text("Aniversariantes (${targetClients.size})", fontSize = 11.sp, maxLines = 1, softWrap = false) }
                     )
                     FilterChip(
                         selected = segmentFilter == "TODOS",
                         onClick = { segmentFilter = "TODOS" },
-                        label = { Text("Todos os Clientes (${clients.size})", maxLines = 1, softWrap = false) }
+                        label = { Text("Todos os Clientes (${clients.size})", fontSize = 11.sp, maxLines = 1, softWrap = false) }
                     )
                 }
 
                 OutlinedTextField(
                     value = campaignMessage,
                     onValueChange = { campaignMessage = it },
-                    label = { Text("Texto da Mensagem Promocional") },
+                    label = { Text("Texto da Mensagem Promocional", fontSize = 12.sp) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(130.dp),
+                        .height(100.dp),
                     minLines = 3
                 )
 
                 Text(
-                    text = "Variáveis suportadas: {nome_cliente}, {nome_salao}, {servico}, {nome_profissional}",
+                    text = "Variáveis: {nome_cliente}, {nome_salao}, {servico}, {nome_profissional}",
                     style = MaterialTheme.typography.labelSmall,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.outline
                 )
 
@@ -1830,11 +1859,12 @@ fun WhatsAppCampaignTab(
                                 campaignTitle = ""
                                 campaignMessage = ""
                             },
-                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
                         ) {
-                            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Excluir")
+                            Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text("Excluir", fontSize = 11.sp)
                         }
                     } else {
                         Spacer(modifier = Modifier.width(1.dp))
@@ -1850,23 +1880,25 @@ fun WhatsAppCampaignTab(
                             )
                             onSaveCampaign(entity)
                         },
-                        enabled = campaignTitle.isNotBlank() && campaignMessage.isNotBlank()
+                        enabled = campaignTitle.isNotBlank() && campaignMessage.isNotBlank(),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(if (selectedTemplateId != null) "Salvar Alterações" else "Cadastrar Campanha")
+                        Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(if (selectedTemplateId != null) "Salvar Alterações" else "Cadastrar Campanha", fontSize = 11.sp)
                     }
                 }
 
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(6.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "🎯 Público Alvo Selecionado: ${targetClients.size} cliente(s)",
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(12.dp)
+                        text = "🎯 Público Alvo: ${targetClients.size} cliente(s)",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(8.dp)
                     )
                 }
             }
@@ -1879,13 +1911,13 @@ fun WhatsAppCampaignTab(
             enabled = targetClients.isNotEmpty() && campaignMessage.isNotBlank(),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(42.dp)
                 .testTag("send_campaign_button"),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(10.dp)
         ) {
-            Icon(Icons.Default.Send, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Disparar Campanha para ${targetClients.size} Cliente(s)", fontWeight = FontWeight.Bold)
+            Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text("Disparar Campanha para ${targetClients.size} Cliente(s)", fontWeight = FontWeight.Bold, fontSize = 13.sp)
         }
     }
 
@@ -1912,23 +1944,24 @@ fun WhatsAppCreateCampaignDialog(
         onDismissRequest = onDismiss,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Campaign, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Cadastrar Nova Campanha")
+                Icon(Icons.Default.Campaign, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Cadastrar Nova Campanha", style = MaterialTheme.typography.titleMedium)
             }
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "Cadastre um novo modelo de campanha promocional para reutilizar e disparar aos seus clientes sempre que desejar.",
+                    text = "Cadastre um novo modelo de campanha promocional para reutilizar e disparar aos seus clientes.",
                     style = MaterialTheme.typography.bodySmall,
+                    fontSize = 11.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Nome da Campanha (Ex: Black Friday, Dia das Mães, Retorno)") },
+                    label = { Text("Nome da Campanha", fontSize = 12.sp) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -1936,16 +1969,17 @@ fun WhatsAppCreateCampaignDialog(
                 OutlinedTextField(
                     value = messageText,
                     onValueChange = { messageText = it },
-                    label = { Text("Texto da Mensagem Promocional") },
+                    label = { Text("Texto da Mensagem Promocional", fontSize = 12.sp) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(130.dp),
+                        .height(100.dp),
                     minLines = 3
                 )
 
                 Text(
-                    text = "Variáveis suportadas: {nome_cliente}, {nome_salao}, {servico}, {nome_profissional}",
+                    text = "Variáveis: {nome_cliente}, {nome_salao}, {servico}, {nome_profissional}",
                     style = MaterialTheme.typography.labelSmall,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.outline
                 )
             }
@@ -1962,11 +1996,13 @@ fun WhatsAppCreateCampaignDialog(
                         )
                     )
                 },
-                enabled = title.isNotBlank() && messageText.isNotBlank()
+                enabled = title.isNotBlank() && messageText.isNotBlank(),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Cadastrar Campanha")
+                Text("Cadastrar Campanha", fontSize = 12.sp)
             }
         },
         dismissButton = {
@@ -1974,7 +2010,7 @@ fun WhatsAppCreateCampaignDialog(
                 onClick = onDismiss,
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
             ) {
-                Text("Cancelar")
+                Text("Cancelar", fontSize = 12.sp)
             }
         }
     )
@@ -1986,23 +2022,23 @@ fun WhatsAppLogsTab(logs: List<WhatsAppLogEntity>) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(32.dp),
+                .padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
             Text("Nenhum histórico de envio registrado ainda.", style = MaterialTheme.typography.bodyMedium)
         }
     } else {
         LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxSize()
         ) {
             items(logs, key = { it.id }) { log ->
                 ElevatedCard(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(10.dp)
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
+                    Column(modifier = Modifier.padding(10.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -2013,11 +2049,11 @@ fun WhatsAppLogsTab(logs: List<WhatsAppLogEntity>) {
                                 fontWeight = FontWeight.Bold
                             )
                             Badge(containerColor = Color(0xFFE8F5E9)) {
-                                Text(log.status, color = Color(0xFF2E7D32), modifier = Modifier.padding(2.dp))
+                                Text(log.status, color = Color(0xFF2E7D32), modifier = Modifier.padding(2.dp), fontSize = 10.sp)
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = log.messageText,
                             style = MaterialTheme.typography.bodySmall,
@@ -2028,6 +2064,7 @@ fun WhatsAppLogsTab(logs: List<WhatsAppLogEntity>) {
                             Text(
                                 text = "Campanha: ${log.campaignName}",
                                 style = MaterialTheme.typography.labelSmall,
+                                fontSize = 10.sp,
                                 color = MaterialTheme.colorScheme.outline
                             )
                         }
@@ -2058,21 +2095,21 @@ fun WhatsAppAiConfigTabContent(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(10.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                modifier = Modifier.padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Tune, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Configurações do Monitor IA", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.Tune, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Configurações do Monitor IA", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 }
 
                 HorizontalDivider()
@@ -2083,10 +2120,10 @@ fun WhatsAppAiConfigTabContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Monitoramento IA Ativo", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
-                        Text("Analisar mensagens recebidas automaticamente", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                        Text("Monitoramento IA Ativo", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
+                        Text("Analisar mensagens recebidas automaticamente", style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, color = MaterialTheme.colorScheme.outline)
                     }
-                    Switch(checked = isMonitoringActive, onCheckedChange = { isMonitoringActive = it })
+                    Switch(checked = isMonitoringActive, onCheckedChange = { isMonitoringActive = it }, modifier = Modifier.scale(0.85f))
                 }
 
                 HorizontalDivider()
@@ -2097,10 +2134,10 @@ fun WhatsAppAiConfigTabContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Pré-Atendimento Automático", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
-                        Text("Enviar mensagem ao cliente pedindo dados faltantes (Serviço, Profissional, Data/Hora)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                        Text("Pré-Atendimento Automático", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
+                        Text("Pedir dados faltantes ao cliente (Serviço, Profissional, Data/Hora)", style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, color = MaterialTheme.colorScheme.outline)
                     }
-                    Switch(checked = autoPreServiceEnabled, onCheckedChange = { autoPreServiceEnabled = it })
+                    Switch(checked = autoPreServiceEnabled, onCheckedChange = { autoPreServiceEnabled = it }, modifier = Modifier.scale(0.85f))
                 }
 
                 HorizontalDivider()
@@ -2111,10 +2148,10 @@ fun WhatsAppAiConfigTabContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Auto-Agendar (>90% Confiança)", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
-                        Text("Cria agendamento direto na agenda quando todas as informações estiverem ok", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                        Text("Auto-Agendar (>90% Confiança)", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
+                        Text("Cria agendamento direto na agenda quando informações estiverem completas", style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, color = MaterialTheme.colorScheme.outline)
                     }
-                    Switch(checked = autoApproveHighConfidence, onCheckedChange = { autoApproveHighConfidence = it })
+                    Switch(checked = autoApproveHighConfidence, onCheckedChange = { autoApproveHighConfidence = it }, modifier = Modifier.scale(0.85f))
                 }
 
                 HorizontalDivider()
@@ -2125,39 +2162,40 @@ fun WhatsAppAiConfigTabContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Notificar Profissional no WhatsApp", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
-                        Text("Prepara disparo com os detalhes para a profissional", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+                        Text("Notificar Profissional no WhatsApp", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall)
+                        Text("Prepara disparo com os detalhes para a profissional", style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, color = MaterialTheme.colorScheme.outline)
                     }
-                    Switch(checked = notifyProfessionalWhatsApp, onCheckedChange = { notifyProfessionalWhatsApp = it })
+                    Switch(checked = notifyProfessionalWhatsApp, onCheckedChange = { notifyProfessionalWhatsApp = it }, modifier = Modifier.scale(0.85f))
                 }
             }
         }
 
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(10.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                modifier = Modifier.padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
                     text = "Modelos de Pré-Atendimento Personalizados",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
 
                 Text(
-                    text = "A IA seleciona a mensagem apropriada dependendo do que o cliente deixou de informar.\n\nVariáveis suportadas: {cliente}, {salão}, {servico}, {profissional}, {data}, {horario}",
-                    style = MaterialTheme.typography.bodySmall,
+                    text = "A IA seleciona a mensagem apropriada dependendo dos dados faltantes.\nVariáveis: {cliente}, {salão}, {servico}, {profissional}, {data}, {horario}",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 OutlinedTextField(
                     value = msgIncompleteInfo,
                     onValueChange = { msgIncompleteInfo = it },
-                    label = { Text("👋 Mensagem Inicial / Dados Incompletos") },
+                    label = { Text("👋 Mensagem Inicial / Incompleta", fontSize = 11.sp) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2
                 )
@@ -2165,7 +2203,7 @@ fun WhatsAppAiConfigTabContent(
                 OutlinedTextField(
                     value = msgMissingService,
                     onValueChange = { msgMissingService = it },
-                    label = { Text("✂️ Quando falta informar o Serviço") },
+                    label = { Text("✂️ Falta informar Serviço", fontSize = 11.sp) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2
                 )
@@ -2173,7 +2211,7 @@ fun WhatsAppAiConfigTabContent(
                 OutlinedTextField(
                     value = msgMissingProfessional,
                     onValueChange = { msgMissingProfessional = it },
-                    label = { Text("👤 Quando falta informar a Profissional") },
+                    label = { Text("👤 Falta informar Profissional", fontSize = 11.sp) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2
                 )
@@ -2181,7 +2219,7 @@ fun WhatsAppAiConfigTabContent(
                 OutlinedTextField(
                     value = msgMissingDateTime,
                     onValueChange = { msgMissingDateTime = it },
-                    label = { Text("📅 Quando falta Data ou Horário") },
+                    label = { Text("📅 Falta Data ou Horário", fontSize = 11.sp) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2
                 )
@@ -2189,7 +2227,7 @@ fun WhatsAppAiConfigTabContent(
                 OutlinedTextField(
                     value = msgCompleteConfirmation,
                     onValueChange = { msgCompleteConfirmation = it },
-                    label = { Text("✅ Confirmação de Agendamento Completo") },
+                    label = { Text("✅ Confirmação Completa", fontSize = 11.sp) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2
                 )
@@ -2207,11 +2245,12 @@ fun WhatsAppAiConfigTabContent(
                             msgMissingDateTime = def.msgMissingDateTime
                             msgIncompleteInfo = def.msgIncompleteInfo
                             msgCompleteConfirmation = def.msgCompleteConfirmation
-                        }
+                        },
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Restaurar Padrão")
+                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text("Restaurar Padrão", fontSize = 11.sp)
                     }
 
                     Button(
@@ -2229,11 +2268,13 @@ fun WhatsAppAiConfigTabContent(
                                     msgCompleteConfirmation = msgCompleteConfirmation
                                 )
                             )
-                        }
+                        },
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Salvar Configurações")
+                        Text("Salvar Configurações", fontSize = 12.sp)
                     }
                 }
             }
@@ -2257,9 +2298,9 @@ fun WaitingQueueTab(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(8.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -2269,13 +2310,14 @@ fun WaitingQueueTab(
             Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                 Text(
                     "Fila de Espera Dinâmica",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
                 Text(
                     "Notificações automáticas no WhatsApp",
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1
                 )
@@ -2283,20 +2325,22 @@ fun WaitingQueueTab(
             Button(
                 onClick = { showAddDialog = true },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Adicionar", fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1, softWrap = false)
+                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(14.dp))
+                Spacer(modifier = Modifier.width(3.dp))
+                Text("Adicionar", fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1, softWrap = false)
             }
         }
 
         if (queueItems.isEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
+                shape = RoundedCornerShape(10.dp)
             ) {
-                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                     Text("Nenhum cliente na fila de espera no momento.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
@@ -2304,67 +2348,69 @@ fun WaitingQueueTab(
             queueItems.forEach { item ->
                 ElevatedCard(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(10.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(10.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Surface(
                                     shape = CircleShape,
                                     color = MaterialTheme.colorScheme.primaryContainer,
-                                    modifier = Modifier.size(36.dp)
+                                    modifier = Modifier.size(28.dp)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
-                                        Text("${item.position}º", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                                        Text("${item.position}º", fontWeight = FontWeight.Bold, fontSize = 11.sp, color = MaterialTheme.colorScheme.onPrimaryContainer)
                                     }
                                 }
                                 Column {
                                     Text(item.clientName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                                    Text("Tel: ${item.clientPhone}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("Tel: ${item.clientPhone}", style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                             AssistChip(
                                 onClick = {},
-                                label = { Text(item.status, fontSize = 11.sp) },
+                                label = { Text(item.status, fontSize = 10.sp) },
                                 colors = AssistChipDefaults.assistChipColors(
                                     containerColor = if (item.status == "CHAMADO") MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
                                 )
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        Spacer(modifier = Modifier.height(6.dp))
 
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Column(modifier = Modifier.padding(end = 8.dp)) {
-                                Text("Serviço: ${item.serviceName}", style = MaterialTheme.typography.bodySmall)
-                                Text("Profissional: ${item.professionalName}", style = MaterialTheme.typography.bodySmall)
-                                Text("Espera estimada: ~${item.estimatedWaitMinutes} min", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                Text("Serviço: ${item.serviceName}", style = MaterialTheme.typography.labelSmall)
+                                Text("Profissional: ${item.professionalName}", style = MaterialTheme.typography.labelSmall)
+                                Text("Espera: ~${item.estimatedWaitMinutes} min", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                             }
 
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                                 OutlinedButton(
                                     onClick = { viewModel.notifyQueueWhatsApp(context, item) },
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 3.dp),
+                                    shape = RoundedCornerShape(6.dp)
                                 ) {
-                                    Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Avisar WhatsApp", fontSize = 12.sp, maxLines = 1, softWrap = false)
+                                    Icon(Icons.Default.NotificationsActive, contentDescription = null, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text("Avisar WhatsApp", fontSize = 11.sp, maxLines = 1, softWrap = false)
                                 }
                                 Button(
                                     onClick = { viewModel.updateQueueStatus(item, if (item.status == "AGUARDANDO") "CHAMADO" else "ATENDIDO") },
-                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 3.dp),
+                                    shape = RoundedCornerShape(6.dp)
                                 ) {
-                                    Text(if (item.status == "AGUARDANDO") "Chamar" else "Concluir", fontSize = 12.sp, maxLines = 1, softWrap = false)
+                                    Text(if (item.status == "AGUARDANDO") "Chamar" else "Concluir", fontSize = 11.sp, maxLines = 1, softWrap = false)
                                 }
                             }
                         }
@@ -2377,26 +2423,26 @@ fun WaitingQueueTab(
     if (showAddDialog) {
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
-            title = { Text("Adicionar Cliente à Fila de Espera") },
+            title = { Text("Adicionar à Fila de Espera", style = MaterialTheme.typography.titleMedium) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Selecione o cliente e os detalhes do atendimento:")
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Selecione o cliente e os detalhes:", style = MaterialTheme.typography.bodySmall)
                     OutlinedTextField(
                         value = serviceName,
                         onValueChange = { serviceName = it },
-                        label = { Text("Serviço Desejado") },
+                        label = { Text("Serviço Desejado", fontSize = 12.sp) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
                         value = professionalName,
                         onValueChange = { professionalName = it },
-                        label = { Text("Profissional") },
+                        label = { Text("Profissional", fontSize = 12.sp) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
                         value = waitMinutes,
                         onValueChange = { waitMinutes = it },
-                        label = { Text("Tempo Estimado (min)") },
+                        label = { Text("Tempo Estimado (min)", fontSize = 12.sp) },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -2410,14 +2456,16 @@ fun WaitingQueueTab(
                         val cPhone = c?.phone ?: "(11) 99999-9999"
                         viewModel.addWaitingQueueItem(cId, cName, cPhone, serviceName, professionalName, waitMinutes.toIntOrNull() ?: 20)
                         showAddDialog = false
-                    }
+                    },
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Adicionar")
+                    Text("Adicionar", fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
-                    Text("Cancelar")
+                    Text("Cancelar", fontSize = 12.sp)
                 }
             }
         )
@@ -2439,9 +2487,9 @@ fun VipSubscriptionsTab(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(8.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -2449,25 +2497,28 @@ fun VipSubscriptionsTab(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text("Clube VIP & Assinaturas de Serviços", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text("Planos mensais com pagamento instantâneo via Pix", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Clube VIP & Assinaturas", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                Text("Planos mensais com Pix instantâneo", style = MaterialTheme.typography.labelSmall, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Button(
                 onClick = { showAddDialog = true },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Novo Plano VIP")
+                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(14.dp))
+                Spacer(modifier = Modifier.width(3.dp))
+                Text("Novo Plano", fontSize = 11.sp)
             }
         }
 
         if (subscriptions.isEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
+                shape = RoundedCornerShape(10.dp)
             ) {
-                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                     Text("Nenhuma assinatura ativa no momento.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
@@ -2475,9 +2526,9 @@ fun VipSubscriptionsTab(
             subscriptions.forEach { sub ->
                 ElevatedCard(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(10.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(10.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -2485,25 +2536,25 @@ fun VipSubscriptionsTab(
                         ) {
                             Column {
                                 Text(sub.planName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                                Text("Cliente: ${sub.clientName}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Cliente: ${sub.clientName}", style = MaterialTheme.typography.bodySmall)
                             }
                             AssistChip(
                                 onClick = {},
-                                label = { Text(sub.status, fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                                label = { Text(sub.status, fontSize = 10.sp, fontWeight = FontWeight.Bold) },
                                 colors = AssistChipDefaults.assistChipColors(
                                     containerColor = if (sub.status == "ATIVO") Color(0xFFE8F5E9) else Color(0xFFFFF8E1)
                                 )
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Benefícios: ${sub.remainingBenefits}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("Valor Mensal: R$ %.2f".format(sub.monthlyFee), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                        Text("Próxima Renovação: ${sub.renewalDate}", style = MaterialTheme.typography.bodySmall)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Benefícios: ${sub.remainingBenefits}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("Valor Mensal: R$ %.2f".format(sub.monthlyFee), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                        Text("Próxima Renovação: ${sub.renewalDate}", style = MaterialTheme.typography.labelSmall, fontSize = 10.sp)
 
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        Spacer(modifier = Modifier.height(6.dp))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -2513,17 +2564,21 @@ fun VipSubscriptionsTab(
                             if (sub.status == "PENDENTE_PIX") {
                                 Button(
                                     onClick = { viewModel.simulatePixPaymentForSubscription(context, sub) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B))
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00897B)),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                    shape = RoundedCornerShape(8.dp)
                                 ) {
-                                    Icon(Icons.Default.QrCode, contentDescription = null, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Simular Pagar PIX")
+                                    Icon(Icons.Default.QrCode, contentDescription = null, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text("Simular Pagar PIX", fontSize = 11.sp)
                                 }
                             } else {
                                 OutlinedButton(
-                                    onClick = { viewModel.cancelVipSubscription(sub) }
+                                    onClick = { viewModel.cancelVipSubscription(sub) },
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                    shape = RoundedCornerShape(8.dp)
                                 ) {
-                                    Text("Cancelar Plano", color = MaterialTheme.colorScheme.error)
+                                    Text("Cancelar Plano", color = MaterialTheme.colorScheme.error, fontSize = 11.sp)
                                 }
                             }
                         }
@@ -2536,25 +2591,25 @@ fun VipSubscriptionsTab(
     if (showAddDialog) {
         AlertDialog(
             onDismissRequest = { showAddDialog = false },
-            title = { Text("Criar Assinatura Clube VIP") },
+            title = { Text("Criar Assinatura Clube VIP", style = MaterialTheme.typography.titleMedium) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = planName,
                         onValueChange = { planName = it },
-                        label = { Text("Nome do Plano") },
+                        label = { Text("Nome do Plano", fontSize = 12.sp) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
                         value = monthlyFee,
                         onValueChange = { monthlyFee = it },
-                        label = { Text("Valor Mensal (R$)") },
+                        label = { Text("Valor Mensal (R$)", fontSize = 12.sp) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
                         value = benefits,
                         onValueChange = { benefits = it },
-                        label = { Text("Benefícios Inclusos") },
+                        label = { Text("Benefícios Inclusos", fontSize = 12.sp) },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -2568,14 +2623,16 @@ fun VipSubscriptionsTab(
                         val cPhone = c?.phone ?: "(11) 99999-9999"
                         viewModel.addVipSubscription(cId, cName, cPhone, planName, monthlyFee.toDoubleOrNull() ?: 149.00, benefits)
                         showAddDialog = false
-                    }
+                    },
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Gerar Assinatura & PIX")
+                    Text("Gerar Assinatura & PIX", fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
-                    Text("Cancelar")
+                    Text("Cancelar", fontSize = 12.sp)
                 }
             }
         )
@@ -2593,36 +2650,36 @@ fun VoiceAssistantTab(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Surface(
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primaryContainer,
-            modifier = Modifier.size(96.dp)
+            modifier = Modifier.size(64.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Mic, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Default.Mic, contentDescription = null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.primary)
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-        Text("Comandos de Voz & Assistente", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Integração com Google Assistente para agendamentos e consultas em tempo real.", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(modifier = Modifier.height(12.dp))
+        Text("Comandos de Voz & Assistente", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text("Agendamentos e consultas em tempo real.", style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = voiceInputText,
             onValueChange = { voiceInputText = it },
-            label = { Text("Simular Comando de Voz / Texto") },
+            label = { Text("Comando de Voz / Texto", fontSize = 12.sp) },
             placeholder = { Text("Ex: Agendar escova com Beatriz amanhã") },
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = {
@@ -2633,23 +2690,26 @@ fun VoiceAssistantTab(
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(vertical = 6.dp),
+            shape = RoundedCornerShape(8.dp)
         ) {
-            Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Processar Comando")
+            Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(14.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text("Processar Comando", fontSize = 12.sp)
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+            shape = RoundedCornerShape(10.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Resposta da IA / Assistente:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(lastResponse, style = MaterialTheme.typography.bodyMedium)
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text("Resposta da IA / Assistente:", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(lastResponse, style = MaterialTheme.typography.bodySmall)
             }
         }
     }

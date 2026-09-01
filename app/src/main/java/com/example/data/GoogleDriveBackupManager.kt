@@ -24,7 +24,7 @@ object GoogleDriveBackupManager {
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_TOKEN_EXPIRY = "token_expiry"
 
-    private const val CLIENT_ID = "466466787667-7516l0imqgfmk8p1n669rqvdh4nsoohr.apps.googleusercontent.com"
+    private const val DEFAULT_CLIENT_ID = "466466787667-7516l0imqgfmk8p1n669rqvdh4nsoohr.apps.googleusercontent.com"
     private const val REDIRECT_URI = "http://localhost"
     
     private val client = OkHttpClient()
@@ -35,17 +35,45 @@ object GoogleDriveBackupManager {
         val createdTime: String
     )
 
-    fun getOAuthLoginUrl(): String {
+    private fun getPrefs(context: Context) = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    fun getClientId(context: Context): String {
+        return getPrefs(context).getString("custom_client_id", null)?.takeIf { it.isNotBlank() } ?: DEFAULT_CLIENT_ID
+    }
+
+    fun getClientSecret(context: Context): String {
+        return getPrefs(context).getString("custom_client_secret", null) ?: ""
+    }
+
+    fun saveClientCredentials(context: Context, clientId: String, clientSecret: String) {
+        getPrefs(context).edit()
+            .putString("custom_client_id", clientId.trim())
+            .putString("custom_client_secret", clientSecret.trim())
+            .apply()
+    }
+
+    fun getOAuthLoginUrl(context: Context): String {
+        val clientId = getClientId(context)
+        val encodedRedirect = android.net.Uri.encode(REDIRECT_URI)
+        val encodedScope = android.net.Uri.encode("https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email")
         return "https://accounts.google.com/o/oauth2/v2/auth?" +
-                "client_id=$CLIENT_ID" +
-                "&redirect_uri=$REDIRECT_URI" +
+                "client_id=$clientId" +
+                "&redirect_uri=$encodedRedirect" +
                 "&response_type=code" +
-                "&scope=https://www.googleapis.com/auth/drive.file%20https://www.googleapis.com/auth/userinfo.email" +
+                "&scope=$encodedScope" +
                 "&prompt=consent" +
                 "&access_type=offline"
     }
 
-    private fun getPrefs(context: Context) = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    fun saveDirectAccessToken(context: Context, accessToken: String) {
+        val cleanToken = accessToken.trim()
+        val expiryTime = System.currentTimeMillis() + (3600 * 1000)
+        getPrefs(context).edit()
+            .putString(KEY_ACCESS_TOKEN, cleanToken)
+            .putString(KEY_REFRESH_TOKEN, cleanToken)
+            .putLong(KEY_TOKEN_EXPIRY, expiryTime)
+            .apply()
+    }
 
     fun isConnected(context: Context): Boolean {
         return getPrefs(context).getString(KEY_REFRESH_TOKEN, null) != null
@@ -189,23 +217,55 @@ object GoogleDriveBackupManager {
         return System.currentTimeMillis() + 300000 >= expiry
     }
 
-    suspend fun exchangeCodeForTokens(context: Context, code: String): Result<Unit> {
-        val formBody = FormBody.Builder()
-            .add("client_id", CLIENT_ID)
+    private fun extractCodeInput(input: String): String {
+        val trimmed = input.trim()
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            val uri = android.net.Uri.parse(trimmed)
+            val codeParam = uri.getQueryParameter("code")
+            if (!codeParam.isNullOrBlank()) {
+                return codeParam
+            }
+        }
+        if (trimmed.contains("code=")) {
+            val match = Regex("""code=([^&]+)""").find(trimmed)
+            if (match != null) {
+                return match.groupValues[1]
+            }
+        }
+        return trimmed
+    }
+
+    suspend fun exchangeCodeForTokens(context: Context, codeOrUrlOrToken: String): Result<Unit> {
+        val cleaned = codeOrUrlOrToken.trim()
+        if (cleaned.startsWith("ya29.")) {
+            // Direct OAuth Access Token
+            saveDirectAccessToken(context, cleaned)
+            return Result.success(Unit)
+        }
+
+        val code = extractCodeInput(cleaned)
+        val clientId = getClientId(context)
+        val clientSecret = getClientSecret(context)
+
+        val builder = FormBody.Builder()
+            .add("client_id", clientId)
             .add("code", code)
             .add("grant_type", "authorization_code")
             .add("redirect_uri", REDIRECT_URI)
-            .build()
+        
+        if (clientSecret.isNotBlank()) {
+            builder.add("client_secret", clientSecret)
+        }
 
         val request = Request.Builder()
             .url("https://oauth2.googleapis.com/token")
-            .post(formBody)
+            .post(builder.build())
             .build()
 
         return executeRequest(request) { json ->
             val accessToken = json.getString("access_token")
             val refreshToken = json.optString("refresh_token").takeIf { it.isNotEmpty() }
-            val expiresIn = json.getLong("expires_in")
+            val expiresIn = json.optLong("expires_in", 3600)
             saveTokens(context, accessToken, refreshToken ?: getRefreshToken(context), expiresIn)
             Result.success(Unit)
         }
@@ -215,20 +275,26 @@ object GoogleDriveBackupManager {
         val refreshToken = getRefreshToken(context)
             ?: return Result.failure(Exception("Nenhum token de atualização (refresh token) disponível. Faça login novamente."))
 
-        val formBody = FormBody.Builder()
-            .add("client_id", CLIENT_ID)
+        val clientId = getClientId(context)
+        val clientSecret = getClientSecret(context)
+
+        val builder = FormBody.Builder()
+            .add("client_id", clientId)
             .add("refresh_token", refreshToken)
             .add("grant_type", "refresh_token")
-            .build()
+
+        if (clientSecret.isNotBlank()) {
+            builder.add("client_secret", clientSecret)
+        }
 
         val request = Request.Builder()
             .url("https://oauth2.googleapis.com/token")
-            .post(formBody)
+            .post(builder.build())
             .build()
 
         return executeRequest(request) { json ->
             val accessToken = json.getString("access_token")
-            val expiresIn = json.getLong("expires_in")
+            val expiresIn = json.optLong("expires_in", 3600)
             saveTokens(context, accessToken, getRefreshToken(context), expiresIn)
             Result.success(accessToken)
         }

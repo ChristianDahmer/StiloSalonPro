@@ -285,6 +285,8 @@ class SalonViewModel(application: Application) : AndroidViewModel(application) {
     fun addAppointment(appointment: AppointmentEntity, context: Context? = null) {
         viewModelScope.launch {
             val newId = repository.insertAppointment(appointment)
+            val apptWithId = appointment.copy(id = newId)
+            autoSyncAppointmentToFinance(apptWithId)
             if (!appointment.isBlock && context != null) {
                 // Auto trigger WhatsApp confirmation
                 val msg = formatWhatsAppMessage("CONFIRMATION", appointment.clientName, appointment.date, appointment.time, appointment.serviceName, appointment.professionalName)
@@ -305,6 +307,7 @@ class SalonViewModel(application: Application) : AndroidViewModel(application) {
     fun updateAppointment(appointment: AppointmentEntity) {
         viewModelScope.launch {
             repository.updateAppointment(appointment)
+            autoSyncAppointmentToFinance(appointment)
         }
     }
 
@@ -312,6 +315,7 @@ class SalonViewModel(application: Application) : AndroidViewModel(application) {
         requestActionConfirmation("Tem certeza que deseja cancelar/excluir este agendamento?") {
             viewModelScope.launch {
                 repository.deleteAppointment(appointment)
+                removeFinanceForAppointment(appointment.id)
             }
         }
     }
@@ -337,6 +341,7 @@ class SalonViewModel(application: Application) : AndroidViewModel(application) {
                 paymentMethod = paymentMethodToUse
             )
             repository.updateAppointment(updated)
+            autoSyncAppointmentToFinance(updated)
 
             // Business Constraint: "Somente irão para plataforma de emissão de nota pagamentos realizados em cartão ou pix"
             val isEligibleForNfse = paymentMethodToUse.uppercase() in listOf("CARTAO", "PIX", "CARTÃO")
@@ -366,6 +371,55 @@ class SalonViewModel(application: Application) : AndroidViewModel(application) {
             } else {
                 Toast.makeText(context, "Atendimento concluído via $paymentMethodToUse! NFS-e NÃO emitida (emissão restrita a Cartão e Pix).", Toast.LENGTH_LONG).show()
             }
+        }
+    }
+
+    private suspend fun autoSyncAppointmentToFinance(appt: AppointmentEntity) {
+        if (appt.isBlock) {
+            removeFinanceForAppointment(appt.id)
+            return
+        }
+        val existingTransactions = financialTransactionsState.value
+        val existing = existingTransactions.firstOrNull { it.relatedAppointmentId == appt.id }
+
+        if (appt.status == "CONCLUIDO") {
+            if (existing != null) {
+                repository.updateFinancialTransaction(
+                    existing.copy(
+                        amount = appt.price,
+                        date = appt.date,
+                        paymentMethod = appt.paymentMethod,
+                        status = "PAGO",
+                        description = "Atendimento - ${appt.serviceName} (${appt.clientName})"
+                    )
+                )
+            } else {
+                repository.insertFinancialTransaction(
+                    FinancialTransactionEntity(
+                        type = "RECEITA",
+                        description = "Atendimento - ${appt.serviceName} (${appt.clientName})",
+                        amount = appt.price,
+                        category = "Serviços",
+                        date = appt.date,
+                        paymentMethod = appt.paymentMethod,
+                        status = "PAGO",
+                        relatedAppointmentId = appt.id,
+                        notes = "Sincronizado automaticamente da Agenda"
+                    )
+                )
+            }
+        } else if (appt.status == "CANCELADO") {
+            if (existing != null) {
+                repository.deleteFinancialTransaction(existing)
+            }
+        }
+    }
+
+    private suspend fun removeFinanceForAppointment(appointmentId: Long) {
+        val existingTransactions = financialTransactionsState.value
+        val existing = existingTransactions.firstOrNull { it.relatedAppointmentId == appointmentId }
+        if (existing != null) {
+            repository.deleteFinancialTransaction(existing)
         }
     }
 

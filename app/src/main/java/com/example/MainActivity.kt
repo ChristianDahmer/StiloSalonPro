@@ -36,6 +36,7 @@ import com.example.ui.screens.salon_settings.SalonSettingsScreen
 import com.example.ui.screens.services.ServicesScreen
 import com.example.ui.screens.whatsapp.WhatsAppScreen
 import com.example.ui.theme.DynamicSalonTheme
+import com.example.utils.NavigationConfig
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,178 +119,98 @@ class MainActivity : ComponentActivity() {
                             searchQuery = searchQuery,
                             onSearchQueryChange = { viewModel.setSearchQuery(it) },
                             onOpenSettings = { currentNavTab = "CONFIGURANCOES" },
-                            onOpenWhatsApp = { currentNavTab = "WHATSAPP" }
+                            onOpenWhatsApp = { currentNavTab = "WHATSAPP" },
+                            onNavigateBack = if (currentNavTab == "CONFIGURANCOES") {
+                                { currentNavTab = settings.defaultStartScreen.ifEmpty { "AGENDAMENTOS" } }
+                            } else null
                         )
                     },
                     bottomBar = {
+                        val orderedModules = remember(settings.bottomNavOrder) {
+                            NavigationConfig.parseNavOrder(settings.bottomNavOrder)
+                        }
+                        val primaryNavItems = orderedModules.take(4)
+                        val secondaryNavItems = orderedModules.drop(4)
+
                         NavigationBar(
                             modifier = Modifier
                                 .windowInsetsPadding(WindowInsets.navigationBars)
                                 .testTag("bottom_navigation_bar")
                         ) {
-                            NavigationBarItem(
-                                selected = currentNavTab == "AGENDAMENTOS",
-                                onClick = { currentNavTab = "AGENDAMENTOS" },
-                                icon = {
-                                    Icon(
-                                        imageVector = if (currentNavTab == "AGENDAMENTOS") Icons.Default.CalendarMonth else Icons.Outlined.CalendarMonth,
-                                        contentDescription = "Agendamentos"
-                                    )
-                                },
-                                label = { Text("Agenda", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
-                                alwaysShowLabel = true,
-                                modifier = Modifier.testTag("nav_item_agendamentos")
-                            )
-
-                            NavigationBarItem(
-                                selected = currentNavTab == "CLIENTES",
-                                onClick = { currentNavTab = "CLIENTES" },
-                                icon = {
-                                    Icon(
-                                        imageVector = if (currentNavTab == "CLIENTES") Icons.Default.People else Icons.Outlined.People,
-                                        contentDescription = "Clientes"
-                                    )
-                                },
-                                label = { Text("Clientes", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
-                                alwaysShowLabel = true,
-                                modifier = Modifier.testTag("nav_item_clientes")
-                            )
-
-                            NavigationBarItem(
-                                selected = currentNavTab == "FINANCEIRO",
-                                onClick = { currentNavTab = "FINANCEIRO" },
-                                icon = {
-                                    Icon(
-                                        imageVector = if (currentNavTab == "FINANCEIRO") Icons.Default.AccountBalanceWallet else Icons.Outlined.AccountBalanceWallet,
-                                        contentDescription = "Financeiro"
-                                    )
-                                },
-                                label = { Text("Financeiro", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
-                                alwaysShowLabel = true,
-                                modifier = Modifier.testTag("nav_item_financeiro")
-                            )
-
-                            NavigationBarItem(
-                                selected = currentNavTab == "WHATSAPP",
-                                onClick = { currentNavTab = "WHATSAPP" },
-                                icon = {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_whatsapp),
-                                        contentDescription = "WhatsApp",
-                                        tint = Color.Unspecified,
-                                        modifier = Modifier.size(22.dp)
-                                    )
-                                },
-                                label = { Text("WhatsApp", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
-                                alwaysShowLabel = true,
-                                modifier = Modifier.testTag("nav_item_whatsapp")
-                            )
-
-                            NavigationBarItem(
-                                selected = currentNavTab == "NFSE",
-                                onClick = { currentNavTab = "NFSE" },
-                                icon = {
-                                    Icon(
-                                        imageVector = if (currentNavTab == "NFSE") Icons.Default.ReceiptLong else Icons.Outlined.ReceiptLong,
-                                        contentDescription = "NFS-e"
-                                    )
-                                },
-                                label = { Text("NFS-e", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
-                                alwaysShowLabel = true,
-                                modifier = Modifier.testTag("nav_item_nfse")
-                            )
-
-                            NavigationBarItem(
-                                selected = currentNavTab in listOf("SERVICOS", "PROFISSIONAIS", "CONFIGURANCOES"),
-                                onClick = { showMenuDropdown = true },
-                                icon = {
-                                    Box {
-                                        Icon(
-                                            imageVector = Icons.Default.MoreHoriz,
-                                            contentDescription = "Mais Módulos"
-                                        )
-                                        DropdownMenu(
-                                            expanded = showMenuDropdown,
-                                            onDismissRequest = { showMenuDropdown = false }
-                                        ) {
-                                            DropdownMenuItem(
-                                                text = { Text("Agenda & Atendimentos") },
-                                                leadingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = null) },
-                                                onClick = {
-                                                    currentNavTab = "AGENDAMENTOS"
-                                                    showMenuDropdown = false
-                                                }
+                            primaryNavItems.forEach { item ->
+                                val isSelected = currentNavTab == item.id
+                                NavigationBarItem(
+                                    selected = isSelected,
+                                    onClick = { currentNavTab = item.id },
+                                    icon = {
+                                        if (item.customDrawableRes != null) {
+                                            Icon(
+                                                painter = painterResource(id = item.customDrawableRes),
+                                                contentDescription = item.shortLabel,
+                                                tint = Color.Unspecified,
+                                                modifier = Modifier.size(22.dp)
                                             )
-                                            DropdownMenuItem(
-                                                text = { Text("Gestão Financeira / Caixa") },
-                                                leadingIcon = { Icon(Icons.Default.AccountBalanceWallet, contentDescription = null) },
-                                                onClick = {
-                                                    currentNavTab = "FINANCEIRO"
-                                                    showMenuDropdown = false
-                                                }
-                                            )
-                                            DropdownMenuItem(
-                                                text = { Text("Serviços") },
-                                                leadingIcon = { Icon(Icons.Default.ContentCut, contentDescription = null) },
-                                                onClick = {
-                                                    currentNavTab = "SERVICOS"
-                                                    showMenuDropdown = false
-                                                }
-                                            )
-                                            DropdownMenuItem(
-                                                text = { Text("Equipe / Profissionais") },
-                                                leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) },
-                                                onClick = {
-                                                    currentNavTab = "PROFISSIONAIS"
-                                                    showMenuDropdown = false
-                                                }
-                                            )
-                                            DropdownMenuItem(
-                                                text = { Text("Gestão de Clientes") },
-                                                leadingIcon = { Icon(Icons.Default.People, contentDescription = null) },
-                                                onClick = {
-                                                    currentNavTab = "CLIENTES"
-                                                    showMenuDropdown = false
-                                                }
-                                            )
-                                            DropdownMenuItem(
-                                                text = { Text("WhatsApp & Mensagens") },
-                                                leadingIcon = {
-                                                    Icon(
-                                                        painter = painterResource(id = R.drawable.ic_whatsapp),
-                                                        contentDescription = null,
-                                                        tint = Color.Unspecified,
-                                                        modifier = Modifier.size(20.dp)
-                                                    )
-                                                },
-                                                onClick = {
-                                                    currentNavTab = "WHATSAPP"
-                                                    showMenuDropdown = false
-                                                }
-                                            )
-                                            DropdownMenuItem(
-                                                text = { Text("Plataforma NFS-e") },
-                                                leadingIcon = { Icon(Icons.Default.ReceiptLong, contentDescription = null) },
-                                                onClick = {
-                                                    currentNavTab = "NFSE"
-                                                    showMenuDropdown = false
-                                                }
-                                            )
-                                            DropdownMenuItem(
-                                                text = { Text("Configurações do Salão") },
-                                                leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                                                onClick = {
-                                                    currentNavTab = "CONFIGURANCOES"
-                                                    showMenuDropdown = false
-                                                }
+                                        } else {
+                                            Icon(
+                                                imageVector = if (isSelected) (item.iconFilled ?: Icons.Default.Dashboard) else (item.iconOutlined ?: item.iconFilled ?: Icons.Default.Dashboard),
+                                                contentDescription = item.shortLabel
                                             )
                                         }
-                                    }
-                                },
-                                label = { Text("Mais", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
-                                alwaysShowLabel = true,
-                                modifier = Modifier.testTag("nav_item_mais")
-                            )
+                                    },
+                                    label = { Text(item.shortLabel, style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
+                                    alwaysShowLabel = true,
+                                    modifier = Modifier.testTag(item.testTag)
+                                )
+                            }
+
+                            if (secondaryNavItems.isNotEmpty()) {
+                                val isSecondarySelected = currentNavTab in secondaryNavItems.map { it.id }
+                                NavigationBarItem(
+                                    selected = isSecondarySelected,
+                                    onClick = { showMenuDropdown = true },
+                                    icon = {
+                                        Box {
+                                            Icon(
+                                                imageVector = Icons.Default.MoreHoriz,
+                                                contentDescription = "Mais Módulos"
+                                            )
+                                            DropdownMenu(
+                                                expanded = showMenuDropdown,
+                                                onDismissRequest = { showMenuDropdown = false }
+                                            ) {
+                                                secondaryNavItems.forEach { secItem ->
+                                                    DropdownMenuItem(
+                                                        text = { Text(secItem.fullTitle) },
+                                                        leadingIcon = {
+                                                            if (secItem.customDrawableRes != null) {
+                                                                Icon(
+                                                                    painter = painterResource(id = secItem.customDrawableRes),
+                                                                    contentDescription = null,
+                                                                    tint = Color.Unspecified,
+                                                                    modifier = Modifier.size(20.dp)
+                                                                )
+                                                            } else {
+                                                                Icon(
+                                                                    imageVector = secItem.iconFilled ?: Icons.Default.Dashboard,
+                                                                    contentDescription = null
+                                                                )
+                                                            }
+                                                        },
+                                                        onClick = {
+                                                            currentNavTab = secItem.id
+                                                            showMenuDropdown = false
+                                                        },
+                                                        modifier = Modifier.testTag("dropdown_item_${secItem.id.lowercase()}")
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    },
+                                    label = { Text("Mais", style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp), maxLines = 1, softWrap = false) },
+                                    alwaysShowLabel = true,
+                                    modifier = Modifier.testTag("nav_item_mais")
+                                )
+                            }
                         }
                     },
                     modifier = Modifier.fillMaxSize()
@@ -362,7 +283,10 @@ class MainActivity : ComponentActivity() {
 
                             "CONFIGURANCOES" -> SalonSettingsScreen(
                                 viewModel = viewModel,
-                                settings = settings
+                                settings = settings,
+                                onClose = {
+                                    currentNavTab = settings.defaultStartScreen.ifBlank { "AGENDAMENTOS" }
+                                }
                             )
 
                             else -> AppointmentsScreen(

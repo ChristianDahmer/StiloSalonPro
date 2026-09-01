@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
         ProcedureHistoryEntity::class,
         VipSubscriptionEntity::class
     ],
-    version = 6,
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -75,7 +75,8 @@ abstract class AppDatabase : RoomDatabase() {
                         defaultStartScreen = "AGENDAMENTOS",
                         themePalette = "ROSE_GOLD",
                         darkModeOption = "SYSTEM",
-                        useDynamicColor = false
+                        useDynamicColor = false,
+                        headerBackgroundUri = "preset:hero_salon"
                     )
                 )
 

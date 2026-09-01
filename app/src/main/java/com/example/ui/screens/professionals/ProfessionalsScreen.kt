@@ -73,23 +73,23 @@ fun ProfessionalsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(32.dp),
+                        .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = Icons.Outlined.Badge,
                             contentDescription = null,
-                            modifier = Modifier.size(64.dp),
+                            modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.outline
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = "Nenhum profissional encontrado",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Toque no botão + para cadastrar novos colaboradores.",
                             style = MaterialTheme.typography.bodySmall,
@@ -101,9 +101,9 @@ fun ProfessionalsScreen(
                 if (isGridView) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(filteredProfessionals, key = { it.id }) { prof ->
@@ -117,8 +117,8 @@ fun ProfessionalsScreen(
                     }
                 } else {
                     LazyColumn(
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(start = 10.dp, end = 10.dp, top = 2.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(filteredProfessionals, key = { it.id }) { prof ->
@@ -173,52 +173,54 @@ fun ProfessionalListItem(
                     onDoubleTap = { onEdit() }
                 )
             },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = professional.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
                 )
                 Text(
                     text = professional.specialty,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
 
                 Text(
                     text = "📞 ${professional.phone} • ✉️ ${professional.email}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
                 )
-
-                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = "Escala: ${professional.workDays} (${professional.startHour} às ${professional.endHour})",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.outline
+                    color = MaterialTheme.colorScheme.outline,
+                    maxLines = 1
                 )
             }
 
             Row {
-                IconButton(onClick = onDuplicate) {
-                    Icon(Icons.Outlined.ContentCopy, contentDescription = "Duplicar Perfil/Escala", tint = MaterialTheme.colorScheme.primary)
+                IconButton(onClick = onDuplicate, modifier = Modifier.size(26.dp)) {
+                    Icon(Icons.Outlined.ContentCopy, contentDescription = "Duplicar Perfil/Escala", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(15.dp))
                 }
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Outlined.Edit, contentDescription = "Editar")
+                IconButton(onClick = onEdit, modifier = Modifier.size(26.dp)) {
+                    Icon(Icons.Outlined.Edit, contentDescription = "Editar", modifier = Modifier.size(15.dp))
                 }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Outlined.Delete, contentDescription = "Excluir", tint = MaterialTheme.colorScheme.error)
+                IconButton(onClick = onDelete, modifier = Modifier.size(26.dp)) {
+                    Icon(Icons.Outlined.Delete, contentDescription = "Excluir", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(15.dp))
                 }
             }
         }
@@ -240,9 +242,9 @@ fun ProfessionalGridCard(
                     onDoubleTap = { onEdit() }
                 )
             },
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
             Text(
                 text = professional.name,
                 style = MaterialTheme.typography.titleSmall,
@@ -256,7 +258,7 @@ fun ProfessionalGridCard(
                 maxLines = 1
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(3.dp))
 
             Text(
                 text = "📞 ${professional.phone}",
@@ -266,23 +268,24 @@ fun ProfessionalGridCard(
             Text(
                 text = "${professional.startHour} - ${professional.endHour}",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline
+                color = MaterialTheme.colorScheme.outline,
+                maxLines = 1
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Row(
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(onClick = onDuplicate, modifier = Modifier.size(28.dp)) {
-                    Icon(Icons.Outlined.ContentCopy, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                IconButton(onClick = onDuplicate, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Outlined.ContentCopy, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                 }
-                IconButton(onClick = onEdit, modifier = Modifier.size(28.dp)) {
-                    Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                IconButton(onClick = onEdit, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
                 }
-                IconButton(onClick = onDelete, modifier = Modifier.size(28.dp)) {
-                    Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
+                    Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(14.dp))
                 }
             }
         }
@@ -318,7 +321,8 @@ fun ProfessionalFormDialog(
                         title = {
                             Text(
                                 if (professional == null) "Novo Profissional" else "Editar Profissional",
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium
                             )
                         },
                         navigationIcon = {
@@ -344,7 +348,8 @@ fun ProfessionalFormDialog(
                                 enabled = name.isNotBlank() && specialty.isNotBlank(),
                                 modifier = Modifier
                                     .padding(end = 8.dp)
-                                    .testTag("save_professional_button")
+                                    .testTag("save_professional_button"),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                             ) {
                                 Text("Salvar")
                             }
@@ -356,13 +361,13 @@ fun ProfessionalFormDialog(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
-                        .padding(20.dp)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                         .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
                         text = "Informações do Colaborador",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -371,6 +376,7 @@ fun ProfessionalFormDialog(
                         value = name,
                         onValueChange = { name = it },
                         label = { Text("Nome Completo *") },
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -378,6 +384,7 @@ fun ProfessionalFormDialog(
                         value = specialty,
                         onValueChange = { specialty = it },
                         label = { Text("Especialidade *") },
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -393,6 +400,7 @@ fun ProfessionalFormDialog(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("E-mail Profissional") },
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -400,20 +408,23 @@ fun ProfessionalFormDialog(
                         value = workDays,
                         onValueChange = { workDays = it },
                         label = { Text("Dias de Atendimento") },
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         OutlinedTextField(
                             value = startHour,
                             onValueChange = { startHour = it },
                             label = { Text("Início (HH:mm)") },
+                            singleLine = true,
                             modifier = Modifier.weight(1f)
                         )
                         OutlinedTextField(
                             value = endHour,
                             onValueChange = { endHour = it },
                             label = { Text("Fim (HH:mm)") },
+                            singleLine = true,
                             modifier = Modifier.weight(1f)
                         )
                     }

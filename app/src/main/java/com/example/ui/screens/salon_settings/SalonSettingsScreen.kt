@@ -1,5 +1,10 @@
 package com.example.ui.screens.salon_settings
 
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,14 +17,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.CloudQueue
-import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.outlined.Palette
-import androidx.compose.material.icons.outlined.Store
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,24 +26,74 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.R
 import com.example.data.model.SalonSettingsEntity
 import com.example.ui.SalonViewModel
 import com.example.ui.components.MaskedOutlinedTextField
 import com.example.ui.theme.getPaletteColors
+import com.example.utils.NavigationConfig
+
+@Composable
+fun SalonHeaderBackground(
+    imageUriOrPreset: String,
+    contentDescription: String?,
+    modifier: Modifier = Modifier
+) {
+    when {
+        imageUriOrPreset == "preset:luxury_spa" -> {
+            Image(
+                painter = painterResource(id = R.drawable.img_banner_luxury_spa_1788265661724),
+                contentDescription = contentDescription,
+                modifier = modifier,
+                contentScale = ContentScale.Crop
+            )
+        }
+        imageUriOrPreset == "preset:modern_studio" -> {
+            Image(
+                painter = painterResource(id = R.drawable.img_banner_modern_studio_1788265675431),
+                contentDescription = contentDescription,
+                modifier = modifier,
+                contentScale = ContentScale.Crop
+            )
+        }
+        imageUriOrPreset == "preset:hero_salon" || imageUriOrPreset.isBlank() -> {
+            Image(
+                painter = painterResource(id = R.drawable.img_hero_salon_1785407233613),
+                contentDescription = contentDescription,
+                modifier = modifier,
+                contentScale = ContentScale.Crop
+            )
+        }
+        else -> {
+            AsyncImage(
+                model = imageUriOrPreset,
+                contentDescription = contentDescription,
+                modifier = modifier,
+                contentScale = ContentScale.Crop,
+                placeholder = painterResource(id = R.drawable.img_hero_salon_1785407233613),
+                error = painterResource(id = R.drawable.img_hero_salon_1785407233613)
+            )
+        }
+    }
+}
 
 @Composable
 fun SalonSettingsScreen(
     viewModel: SalonViewModel,
     settings: SalonSettingsEntity,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClose: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+
     var razaoSocial by remember(settings) { mutableStateOf(settings.razaoSocial) }
     var nomeFantasia by remember(settings) { mutableStateOf(settings.nomeFantasia) }
     var cnpj by remember(settings) { mutableStateOf(settings.cnpj) }
@@ -54,6 +103,21 @@ fun SalonSettingsScreen(
     var darkModeOption by remember(settings) { mutableStateOf(settings.darkModeOption) }
     var useDynamicColor by remember(settings) { mutableStateOf(settings.useDynamicColor) }
     var masterPassword by remember(settings) { mutableStateOf(settings.masterPassword) }
+    var headerBackgroundUri by remember(settings) {
+        mutableStateOf(settings.headerBackgroundUri.ifBlank { "preset:hero_salon" })
+    }
+    var bottomNavOrderList by remember(settings.bottomNavOrder) {
+        mutableStateOf(NavigationConfig.parseNavOrder(settings.bottomNavOrder))
+    }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            headerBackgroundUri = uri.toString()
+            Toast.makeText(context, "Imagem de fundo do cabeçalho selecionada!", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     val isConnected by viewModel.gdriveConnected.collectAsState()
     val backups by viewModel.gdriveBackups.collectAsState()
@@ -71,6 +135,10 @@ fun SalonSettingsScreen(
 
     var showAuthDialog by remember { mutableStateOf(false) }
     var authUrl by remember { mutableStateOf("") }
+    var inputAuthCode by remember { mutableStateOf("") }
+    var customClientId by remember { mutableStateOf(com.example.data.GoogleDriveBackupManager.getClientId(context)) }
+    var customClientSecret by remember { mutableStateOf(com.example.data.GoogleDriveBackupManager.getClientSecret(context)) }
+    var showAdvancedOAuth by remember { mutableStateOf(false) }
 
     var selectedBackupForRestore by remember { mutableStateOf<com.example.data.GoogleDriveBackupManager.DriveFile?>(null) }
     var showRestoreConfirm by remember { mutableStateOf(false) }
@@ -86,58 +154,85 @@ fun SalonSettingsScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // Hero Banner Card
         ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("salon_hero_banner_card"),
             shape = RoundedCornerShape(16.dp)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp)
+                    .height(150.dp)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.img_hero_salon_1785407233613),
+                SalonHeaderBackground(
+                    imageUriOrPreset = headerBackgroundUri,
                     contentDescription = "Salon Hero",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    modifier = Modifier.fillMaxSize()
                 )
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.4f))
-                        .padding(16.dp),
+                        .background(Color.Black.copy(alpha = 0.45f))
+                        .padding(14.dp),
                     contentAlignment = Alignment.BottomStart
                 ) {
-                    Column {
-                        Text(
-                            text = nomeFantasia.ifBlank { "Seu Salão" },
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = "Personalize as preferências, tema visual e dados fiscais do salão.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.8f)
-                        )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            Text(
+                                text = nomeFantasia.ifBlank { "Seu Salão" },
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "Personalize o cabeçalho, preferências visuais e dados do salão.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.85f)
+                            )
+                        }
+
+                        FilledTonalButton(
+                            onClick = {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = Color.White.copy(alpha = 0.9f),
+                                contentColor = Color.Black
+                            ),
+                            modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp).testTag("quick_change_banner_button")
+                        ) {
+                            Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Trocar Foto", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
         }
 
-        // Section 1: Business Details
+        // Section 1: Business Details (Compact Spacings)
         ElevatedCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.Store, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(Icons.Outlined.Store, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text("Dados da Empresa", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
 
@@ -145,6 +240,7 @@ fun SalonSettingsScreen(
                     value = nomeFantasia,
                     onValueChange = { nomeFantasia = it },
                     label = { Text("Nome Fantasia (exibido na TopBar) *") },
+                    singleLine = true,
                     modifier = Modifier.fillMaxWidth().testTag("nome_fantasia_input")
                 )
 
@@ -152,6 +248,7 @@ fun SalonSettingsScreen(
                     value = razaoSocial,
                     onValueChange = { razaoSocial = it },
                     label = { Text("Razão Social *") },
+                    singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -181,34 +278,382 @@ fun SalonSettingsScreen(
             }
         }
 
-        // Section 2: General Personalization & Start Screen
+        // Section 2: Sequência dos Botões do Menu Inferior & Definição da Tela Inicial (Unificados)
         ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
+            modifier = Modifier.fillMaxWidth().testTag("bottom_nav_order_card"),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Personalização de Tela Inicial", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text("Selecione qual módulo será aberto ao iniciar o aplicativo:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.ViewAgenda, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Sequência dos Botões & Tela Inicial",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
-                val screens = listOf(
-                    "AGENDAMENTOS" to "Agendamentos (Agenda)",
-                    "SERVICOS" to "Cadastro de Serviços",
-                    "PROFISSIONAIS" to "Profissionais",
-                    "CLIENTES" to "Gestão de Clientes",
-                    "NFSE" to "Plataforma NFS-e",
-                    "WHATSAPP" to "Mensagens WhatsApp"
+                    TextButton(
+                        onClick = {
+                            val defaultList = NavigationConfig.parseNavOrder(NavigationConfig.DEFAULT_NAV_ORDER)
+                            bottomNavOrderList = defaultList
+                            val serialized = NavigationConfig.serializeNavOrder(defaultList)
+                            viewModel.saveSettings(
+                                settings.copy(
+                                    razaoSocial = razaoSocial,
+                                    nomeFantasia = nomeFantasia,
+                                    cnpj = cnpj,
+                                    inscricaoEstadual = inscricaoEstadual,
+                                    defaultStartScreen = defaultStartScreen,
+                                    themePalette = selectedPalette,
+                                    darkModeOption = darkModeOption,
+                                    useDynamicColor = useDynamicColor,
+                                    masterPassword = masterPassword,
+                                    bottomNavOrder = serialized,
+                                    headerBackgroundUri = headerBackgroundUri
+                                )
+                            )
+                        }
+                    ) {
+                        Icon(Icons.Default.RestartAlt, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Padrão", fontSize = 12.sp)
+                    }
+                }
+
+                Text(
+                    text = "Ordene a prioridade dos botões na barra inferior (os 4 primeiros ficam visíveis no rodapé) e marque o botão de opção (★) para definir qual módulo será a Tela Inicial ao abrir o aplicativo.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                screens.forEach { (key, label) ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { defaultStartScreen = key }
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(selected = defaultStartScreen == key, onClick = { defaultStartScreen = key })
-                        Text(label, style = MaterialTheme.typography.bodyMedium)
+                // Live Preview
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Prévia da Barra Inferior:",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            val startScreenName = bottomNavOrderList.find { it.id == defaultStartScreen }?.shortLabel ?: "Agendamentos"
+                            Text(
+                                text = "★ Início: $startScreenName",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+                                .padding(vertical = 6.dp, horizontal = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val previewPrimary = bottomNavOrderList.take(4)
+                            previewPrimary.forEach { item ->
+                                val isStart = item.id == defaultStartScreen
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Box(contentAlignment = Alignment.TopEnd) {
+                                        if (item.customDrawableRes != null) {
+                                            Icon(
+                                                painter = painterResource(id = item.customDrawableRes),
+                                                contentDescription = null,
+                                                tint = Color.Unspecified,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = item.iconFilled ?: Icons.Default.Dashboard,
+                                                contentDescription = null,
+                                                tint = if (isStart) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                        if (isStart) {
+                                            Text("★", color = MaterialTheme.colorScheme.primary, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                    Text(
+                                        text = item.shortLabel,
+                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                                        maxLines = 1,
+                                        fontWeight = if (isStart) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isStart) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreHoriz,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.outline,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = "Mais (+${bottomNavOrderList.size - 4})",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                                    maxLines = 1,
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Reordering items with Integrated Initial Screen Selection
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    bottomNavOrderList.forEachIndexed { index, item ->
+                        val isDirectNav = index < 4
+                        val isStartScreen = defaultStartScreen == item.id
+
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = if (isStartScreen) {
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                            } else if (isDirectNav) {
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            },
+                            border = BorderStroke(
+                                width = if (isStartScreen) 1.5.dp else 1.dp,
+                                color = if (isStartScreen) {
+                                    MaterialTheme.colorScheme.primary
+                                } else if (isDirectNav) {
+                                    MaterialTheme.colorScheme.outlineVariant
+                                } else {
+                                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                }
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable {
+                                            defaultStartScreen = item.id
+                                            viewModel.saveSettings(
+                                                settings.copy(
+                                                    razaoSocial = razaoSocial,
+                                                    nomeFantasia = nomeFantasia,
+                                                    cnpj = cnpj,
+                                                    inscricaoEstadual = inscricaoEstadual,
+                                                    defaultStartScreen = item.id,
+                                                    themePalette = selectedPalette,
+                                                    darkModeOption = darkModeOption,
+                                                    useDynamicColor = useDynamicColor,
+                                                    masterPassword = masterPassword,
+                                                    bottomNavOrder = NavigationConfig.serializeNavOrder(bottomNavOrderList)
+                                                )
+                                            )
+                                        },
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    RadioButton(
+                                        selected = isStartScreen,
+                                        onClick = {
+                                            defaultStartScreen = item.id
+                                            viewModel.saveSettings(
+                                                settings.copy(
+                                                    razaoSocial = razaoSocial,
+                                                    nomeFantasia = nomeFantasia,
+                                                    cnpj = cnpj,
+                                                    inscricaoEstadual = inscricaoEstadual,
+                                                    defaultStartScreen = item.id,
+                                                    themePalette = selectedPalette,
+                                                    darkModeOption = darkModeOption,
+                                                    useDynamicColor = useDynamicColor,
+                                                    masterPassword = masterPassword,
+                                                    bottomNavOrder = NavigationConfig.serializeNavOrder(bottomNavOrderList)
+                                                )
+                                            )
+                                        },
+                                        modifier = Modifier.size(24.dp)
+                                    )
+
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = if (isStartScreen) MaterialTheme.colorScheme.primary else if (isDirectNav) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                        modifier = Modifier.size(22.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(
+                                                text = "${index + 1}",
+                                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                                fontWeight = FontWeight.Bold,
+                                                color = if (isStartScreen) MaterialTheme.colorScheme.onPrimary else if (isDirectNav) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+
+                                    if (item.customDrawableRes != null) {
+                                        Icon(
+                                            painter = painterResource(id = item.customDrawableRes),
+                                            contentDescription = null,
+                                            tint = Color.Unspecified,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = item.iconFilled ?: Icons.Default.Dashboard,
+                                            contentDescription = null,
+                                            tint = if (isStartScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Text(
+                                                text = item.fullTitle,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = if (isStartScreen) FontWeight.Bold else FontWeight.SemiBold,
+                                                color = if (isStartScreen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                                maxLines = 1
+                                            )
+                                            if (isStartScreen) {
+                                                SuggestionChip(
+                                                    onClick = {},
+                                                    label = { Text("★ Tela Inicial", fontSize = 8.sp, fontWeight = FontWeight.Bold) },
+                                                    colors = SuggestionChipDefaults.suggestionChipColors(
+                                                        containerColor = MaterialTheme.colorScheme.primary,
+                                                        labelColor = MaterialTheme.colorScheme.onPrimary
+                                                    ),
+                                                    modifier = Modifier.height(18.dp)
+                                                )
+                                            } else if (isDirectNav) {
+                                                SuggestionChip(
+                                                    onClick = {},
+                                                    label = { Text("Barra", fontSize = 8.sp) },
+                                                    colors = SuggestionChipDefaults.suggestionChipColors(
+                                                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                                        labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                                    ),
+                                                    modifier = Modifier.height(18.dp)
+                                                )
+                                            }
+                                        }
+                                        Text(
+                                            text = item.description,
+                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    IconButton(
+                                        onClick = {
+                                            if (index > 0) {
+                                                val mutable = bottomNavOrderList.toMutableList()
+                                                val temp = mutable[index]
+                                                mutable[index] = mutable[index - 1]
+                                                mutable[index - 1] = temp
+                                                bottomNavOrderList = mutable
+                                                val serialized = NavigationConfig.serializeNavOrder(mutable)
+                                                viewModel.saveSettings(
+                                                    settings.copy(
+                                                        razaoSocial = razaoSocial,
+                                                        nomeFantasia = nomeFantasia,
+                                                        cnpj = cnpj,
+                                                        inscricaoEstadual = inscricaoEstadual,
+                                                        defaultStartScreen = defaultStartScreen,
+                                                        themePalette = selectedPalette,
+                                                        darkModeOption = darkModeOption,
+                                                        useDynamicColor = useDynamicColor,
+                                                        masterPassword = masterPassword,
+                                                        bottomNavOrder = serialized
+                                                    )
+                                                )
+                                            }
+                                        },
+                                        enabled = index > 0,
+                                        modifier = Modifier.size(28.dp).testTag("move_up_${item.id.lowercase()}")
+                                    ) {
+                                        Icon(
+                                            Icons.Default.ArrowUpward,
+                                            contentDescription = "Mover para cima",
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+
+                                    IconButton(
+                                        onClick = {
+                                            if (index < bottomNavOrderList.size - 1) {
+                                                val mutable = bottomNavOrderList.toMutableList()
+                                                val temp = mutable[index]
+                                                mutable[index] = mutable[index + 1]
+                                                mutable[index + 1] = temp
+                                                bottomNavOrderList = mutable
+                                                val serialized = NavigationConfig.serializeNavOrder(mutable)
+                                                viewModel.saveSettings(
+                                                    settings.copy(
+                                                        razaoSocial = razaoSocial,
+                                                        nomeFantasia = nomeFantasia,
+                                                        cnpj = cnpj,
+                                                        inscricaoEstadual = inscricaoEstadual,
+                                                        defaultStartScreen = defaultStartScreen,
+                                                        themePalette = selectedPalette,
+                                                        darkModeOption = darkModeOption,
+                                                        useDynamicColor = useDynamicColor,
+                                                        masterPassword = masterPassword,
+                                                        bottomNavOrder = serialized
+                                                    )
+                                                )
+                                            }
+                                        },
+                                        enabled = index < bottomNavOrderList.size - 1,
+                                        modifier = Modifier.size(28.dp).testTag("move_down_${item.id.lowercase()}")
+                                    ) {
+                                        Icon(
+                                            Icons.Default.ArrowDownward,
+                                            contentDescription = "Mover para baixo",
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -436,7 +881,7 @@ fun SalonSettingsScreen(
                 if (!isConnected) {
                     Button(
                         onClick = {
-                            authUrl = com.example.data.GoogleDriveBackupManager.getOAuthLoginUrl()
+                            authUrl = com.example.data.GoogleDriveBackupManager.getOAuthLoginUrl(context)
                             showAuthDialog = true
                         },
                         modifier = Modifier.fillMaxWidth().testTag("gdrive_connect_button"),
@@ -632,29 +1077,53 @@ fun SalonSettingsScreen(
             }
         }
 
-        // Save Button
-        Button(
-            onClick = {
-                val updated = settings.copy(
-                    razaoSocial = razaoSocial,
-                    nomeFantasia = nomeFantasia,
-                    cnpj = cnpj,
-                    inscricaoEstadual = inscricaoEstadual,
-                    defaultStartScreen = defaultStartScreen,
-                    themePalette = selectedPalette,
-                    darkModeOption = darkModeOption,
-                    useDynamicColor = useDynamicColor,
-                    masterPassword = masterPassword
-                )
-                viewModel.saveSettings(updated)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .testTag("save_settings_button"),
-            shape = RoundedCornerShape(12.dp)
+        // Bottom Action Buttons: Save (Closes screen) & Close/Cancel
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text("Salvar Todas as Configurações", fontWeight = FontWeight.Bold)
+            OutlinedButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .weight(0.35f)
+                    .height(50.dp)
+                    .testTag("cancel_settings_button"),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Fechar", fontWeight = FontWeight.SemiBold)
+            }
+
+            Button(
+                onClick = {
+                    val updated = settings.copy(
+                        razaoSocial = razaoSocial,
+                        nomeFantasia = nomeFantasia,
+                        cnpj = cnpj,
+                        inscricaoEstadual = inscricaoEstadual,
+                        defaultStartScreen = defaultStartScreen,
+                        themePalette = selectedPalette,
+                        darkModeOption = darkModeOption,
+                        useDynamicColor = useDynamicColor,
+                        masterPassword = masterPassword,
+                        bottomNavOrder = NavigationConfig.serializeNavOrder(bottomNavOrderList),
+                        headerBackgroundUri = headerBackgroundUri
+                    )
+                    viewModel.saveSettings(updated)
+                    Toast.makeText(context, "Configurações do salão salvas com sucesso!", Toast.LENGTH_SHORT).show()
+                    onClose()
+                },
+                modifier = Modifier
+                    .weight(0.65f)
+                    .height(50.dp)
+                    .testTag("save_settings_button"),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Salvar Configurações", fontWeight = FontWeight.Bold)
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -664,65 +1133,150 @@ fun SalonSettingsScreen(
     if (showAuthDialog) {
         AlertDialog(
             onDismissRequest = { showAuthDialog = false },
-            title = { Text("Conectar Google Drive") },
-            text = {
-                Box(modifier = Modifier.fillMaxWidth().height(420.dp)) {
-                    androidx.compose.ui.viewinterop.AndroidView(
-                        factory = { ctx ->
-                            android.webkit.WebView(ctx).apply {
-                                this.getSettings().javaScriptEnabled = true
-                                this.getSettings().domStorageEnabled = true
-                                this.getSettings().useWideViewPort = true
-                                this.getSettings().loadWithOverviewMode = true
-                                webViewClient = object : android.webkit.WebViewClient() {
-                                    override fun shouldOverrideUrlLoading(
-                                        view: android.webkit.WebView,
-                                        request: android.webkit.WebResourceRequest
-                                    ): Boolean {
-                                        val url = request.url.toString()
-                                        if (url.startsWith("http://localhost")) {
-                                            val code = request.url.getQueryParameter("code")
-                                            if (code != null) {
-                                                viewModel.connectGDrive(code) { success ->
-                                                    if (success) {
-                                                        showAuthDialog = false
-                                                    }
-                                                }
-                                                return true
-                                            }
-                                        }
-                                        return false
-                                    }
-
-                                    override fun onPageStarted(
-                                        view: android.webkit.WebView?,
-                                        url: String?,
-                                        favicon: android.graphics.Bitmap?
-                                    ) {
-                                        super.onPageStarted(view, url, favicon)
-                                        if (url != null && url.startsWith("http://localhost")) {
-                                            val uri = android.net.Uri.parse(url)
-                                            val code = uri.getQueryParameter("code")
-                                            if (code != null) {
-                                                viewModel.connectGDrive(code) { success ->
-                                                    if (success) {
-                                                        showAuthDialog = false
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        update = { webView ->
-                            webView.loadUrl(authUrl)
-                        },
-                        modifier = Modifier.fillMaxSize()
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.CloudQueue,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Conectar Google Drive", fontWeight = FontWeight.Bold)
+                }
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        "Para conectar com segurança sem bloqueio de segurança do Google, siga as instruções:",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                "1. Autorizar no Navegador Externe",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                            Text(
+                                "Clique abaixo para abrir o login oficial do Google no seu navegador seguro.",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Button(
+                                onClick = {
+                                    val loginUrl = com.example.data.GoogleDriveBackupManager.getOAuthLoginUrl(context)
+                                    val intent = android.content.Intent(
+                                        android.content.Intent.ACTION_VIEW,
+                                        android.net.Uri.parse(loginUrl)
+                                    )
+                                    context.startActivity(intent)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Abrir no Navegador")
+                            }
+                        }
+                    }
+
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                "2. Cole a URL de Retorno ou Código",
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                            Text(
+                                "Copie o link (URL) da página final ou o código gerado após aceitar e cole no campo abaixo:",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            OutlinedTextField(
+                                value = inputAuthCode,
+                                onValueChange = { inputAuthCode = it },
+                                placeholder = { Text("Cole aqui o código ou URL de retorno") },
+                                modifier = Modifier.fillMaxWidth().testTag("gdrive_auth_code_input"),
+                                singleLine = false,
+                                maxLines = 3,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                        }
+                    }
+
+                    TextButton(
+                        onClick = { showAdvancedOAuth = !showAdvancedOAuth },
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Text(if (showAdvancedOAuth) "Ocultar Credenciais OAuth" else "Configurar OAuth Customizado")
+                    }
+
+                    if (showAdvancedOAuth) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedTextField(
+                                value = customClientId,
+                                onValueChange = { customClientId = it },
+                                label = { Text("Client ID do Google Cloud") },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true
+                            )
+                            OutlinedTextField(
+                                value = customClientSecret,
+                                onValueChange = { customClientSecret = it },
+                                label = { Text("Client Secret (Opcional)") },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true
+                            )
+                            Button(
+                                onClick = {
+                                    com.example.data.GoogleDriveBackupManager.saveClientCredentials(context, customClientId, customClientSecret)
+                                },
+                                modifier = Modifier.align(Alignment.End)
+                            ) {
+                                Text("Salvar Credenciais")
+                            }
+                        }
+                    }
                 }
             },
             confirmButton = {
+                Button(
+                    onClick = {
+                        if (inputAuthCode.isNotBlank()) {
+                            viewModel.connectGDrive(inputAuthCode) { success ->
+                                if (success) {
+                                    showAuthDialog = false
+                                    inputAuthCode = ""
+                                }
+                            }
+                        }
+                    },
+                    enabled = inputAuthCode.isNotBlank() && !isLoading,
+                    modifier = Modifier.testTag("gdrive_confirm_auth_button")
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
+                    Text("Conectar")
+                }
+            },
+            dismissButton = {
                 TextButton(
                     onClick = { showAuthDialog = false },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
