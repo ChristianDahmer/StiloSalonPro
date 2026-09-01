@@ -1152,7 +1152,7 @@ fun SalonSettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        "Para conectar com segurança sem bloqueio de segurança do Google, siga as instruções:",
+                        "Para conectar a sua conta do Google Drive com segurança, siga os passos abaixo:",
                         style = MaterialTheme.typography.bodyMedium
                     )
 
@@ -1164,12 +1164,12 @@ fun SalonSettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
-                                "1. Autorizar no Navegador Externe",
+                                "1. Autorizar no Navegador Externo",
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.labelLarge
                             )
                             Text(
-                                "Clique abaixo para abrir o login oficial do Google no seu navegador seguro.",
+                                "Clique abaixo para abrir a autorização oficial do Google no seu navegador.",
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Button(
@@ -1186,8 +1186,28 @@ fun SalonSettingsScreen(
                             ) {
                                 Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Abrir no Navegador")
+                                Text("Abrir Autorização no Google")
                             }
+                        }
+                    }
+
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f)
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Se aparecer 'App Não Verificado' do Google:", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelSmall)
+                            }
+                            Text(
+                                "1. Clique no link 'Avançado' na tela do Google.\n2. Em seguida, clique em 'Ir para [Nome do App] (não seguro)'.\n3. Conceda as permissões solicitadas.",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontSize = 11.sp
+                            )
                         }
                     }
 
@@ -1199,18 +1219,18 @@ fun SalonSettingsScreen(
                     ) {
                         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(
-                                "2. Cole a URL de Retorno ou Código",
+                                "2. Cole a URL de Retorno, Código ou Access Token",
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.labelLarge
                             )
                             Text(
-                                "Copie o link (URL) da página final ou o código gerado após aceitar e cole no campo abaixo:",
+                                "Copie o link completo (URL) da página final de sucesso, o código gerado ou o Access Token (ex: ya29...) e cole abaixo:",
                                 style = MaterialTheme.typography.bodySmall
                             )
                             OutlinedTextField(
                                 value = inputAuthCode,
                                 onValueChange = { inputAuthCode = it },
-                                placeholder = { Text("Cole aqui o código ou URL de retorno") },
+                                placeholder = { Text("Cole aqui o código, URL ou token ya29...") },
                                 modifier = Modifier.fillMaxWidth().testTag("gdrive_auth_code_input"),
                                 singleLine = false,
                                 maxLines = 3,
