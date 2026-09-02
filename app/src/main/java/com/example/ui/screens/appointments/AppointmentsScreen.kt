@@ -37,6 +37,8 @@ import com.example.data.model.NfseEntity
 import com.example.data.model.ProfessionalEntity
 import com.example.data.model.ServiceEntity
 import com.example.ui.SalonViewModel
+import com.example.ui.screens.clients.ClientFormDialog
+import com.example.ui.screens.services.ServiceFormDialog
 import com.example.ui.components.MasterPasswordAuthDialog
 import com.example.ui.components.StatusBadgeChip
 import com.example.utils.MaskUtils
@@ -918,6 +920,7 @@ fun AppointmentsScreen(
             professionals = professionals,
             defaultDate = selectedDate,
             defaultTime = prefilledTimeSlot,
+            viewModel = viewModel,
             onDismiss = { showAddDialog = false },
             onSave = { newApp ->
                 if (newApp.isBlock) {
@@ -939,6 +942,7 @@ fun AppointmentsScreen(
             professionals = professionals,
             defaultDate = selectedAppointmentToEdit?.date ?: selectedDate,
             defaultTime = selectedAppointmentToEdit?.time ?: "10:00",
+            viewModel = viewModel,
             onDismiss = { selectedAppointmentToEdit = null },
             onSave = { updatedApp ->
                 viewModel.updateAppointment(updatedApp)
@@ -1286,6 +1290,7 @@ fun AppointmentFormDialog(
     professionals: List<ProfessionalEntity>,
     defaultDate: String,
     defaultTime: String = "10:00",
+    viewModel: SalonViewModel,
     onDismiss: () -> Unit,
     onSave: (AppointmentEntity) -> Unit
 ) {
@@ -1308,6 +1313,53 @@ fun AppointmentFormDialog(
 
     var expandedClientDropdown by remember { mutableStateOf(false) }
     var expandedServiceDropdown by remember { mutableStateOf(false) }
+
+    var showClientFormDialog by remember { mutableStateOf(false) }
+    var clientToEdit by remember { mutableStateOf<ClientEntity?>(null) }
+
+    if (showClientFormDialog) {
+        ClientFormDialog(
+            client = clientToEdit,
+            onDismiss = { showClientFormDialog = false },
+            onSave = { savedClient ->
+                if (clientToEdit == null) {
+                    viewModel.addClientAndGet(savedClient) { newId ->
+                        val newClient = savedClient.copy(id = newId)
+                        selectedClient = newClient
+                        showClientFormDialog = false
+                    }
+                } else {
+                    viewModel.updateClient(savedClient)
+                    selectedClient = savedClient
+                    showClientFormDialog = false
+                }
+            }
+        )
+    }
+
+    var showServiceFormDialog by remember { mutableStateOf(false) }
+    var serviceToEdit by remember { mutableStateOf<ServiceEntity?>(null) }
+
+    if (showServiceFormDialog) {
+        ServiceFormDialog(
+            service = serviceToEdit,
+            professionals = professionals,
+            onDismiss = { showServiceFormDialog = false },
+            onSave = { savedService ->
+                if (serviceToEdit == null) {
+                    viewModel.addServiceAndGet(savedService) { newId ->
+                        val newService = savedService.copy(id = newId)
+                        selectedService = newService
+                        showServiceFormDialog = false
+                    }
+                } else {
+                    viewModel.updateService(savedService)
+                    selectedService = savedService
+                    showServiceFormDialog = false
+                }
+            }
+        )
+    }
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -1694,7 +1746,7 @@ fun AppointmentFormDialog(
                         onExpandedChange = { expandedClientDropdown = !expandedClientDropdown }
                     ) {
                         OutlinedTextField(
-                            value = selectedClient?.name ?: "Selecione o Cliente",
+                            value = selectedClient?.name ?: "Selecione o Cliente (Dois cliques para cadastrar)",
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Cliente *") },
@@ -1704,11 +1756,28 @@ fun AppointmentFormDialog(
                                 .menuAnchor()
                                 .fillMaxWidth()
                                 .testTag("appointment_client_dropdown")
+                                .pointerInput(selectedClient) {
+                                    detectTapGestures(
+                                        onDoubleTap = {
+                                            clientToEdit = selectedClient
+                                            showClientFormDialog = true
+                                        }
+                                    )
+                                }
                         )
                         ExposedDropdownMenu(
                             expanded = expandedClientDropdown,
                             onDismissRequest = { expandedClientDropdown = false }
                         ) {
+                            DropdownMenuItem(
+                                text = { Text("➕ Cadastrar Novo Cliente...", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary) },
+                                onClick = {
+                                    clientToEdit = null
+                                    showClientFormDialog = true
+                                    expandedClientDropdown = false
+                                }
+                            )
+                            HorizontalDivider()
                             clients.forEach { client ->
                                 DropdownMenuItem(
                                     text = { Text("${client.name} (${MaskUtils.formatPhone(client.phone)})") },
@@ -1727,7 +1796,7 @@ fun AppointmentFormDialog(
                         onExpandedChange = { expandedServiceDropdown = !expandedServiceDropdown }
                     ) {
                         OutlinedTextField(
-                            value = selectedService?.let { "${it.name} • ${MaskUtils.formatCurrency(it.price)}" } ?: "Selecione o Serviço",
+                            value = selectedService?.let { "${it.name} • ${MaskUtils.formatCurrency(it.price)}" } ?: "Selecione o Serviço (Dois cliques para cadastrar)",
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Serviço *") },
@@ -1737,11 +1806,28 @@ fun AppointmentFormDialog(
                                 .menuAnchor()
                                 .fillMaxWidth()
                                 .testTag("appointment_service_dropdown")
+                                .pointerInput(selectedService) {
+                                    detectTapGestures(
+                                        onDoubleTap = {
+                                            serviceToEdit = selectedService
+                                            showServiceFormDialog = true
+                                        }
+                                    )
+                                }
                         )
                         ExposedDropdownMenu(
                             expanded = expandedServiceDropdown,
                             onDismissRequest = { expandedServiceDropdown = false }
                         ) {
+                            DropdownMenuItem(
+                                text = { Text("➕ Cadastrar Novo Serviço...", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary) },
+                                onClick = {
+                                    serviceToEdit = null
+                                    showServiceFormDialog = true
+                                    expandedServiceDropdown = false
+                                }
+                            )
+                            HorizontalDivider()
                             services.forEach { service ->
                                 DropdownMenuItem(
                                     text = { Text("${service.name} • ${MaskUtils.formatCurrency(service.price)} (${service.durationMinutes} min)") },

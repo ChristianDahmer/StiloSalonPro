@@ -209,6 +209,13 @@ class SalonViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun addClientAndGet(client: ClientEntity, onResult: (Long) -> Unit) {
+        viewModelScope.launch {
+            val id = repository.insertClient(client)
+            onResult(id)
+        }
+    }
+
     fun updateClient(client: ClientEntity) {
         viewModelScope.launch {
             repository.updateClient(client)
@@ -227,6 +234,13 @@ class SalonViewModel(application: Application) : AndroidViewModel(application) {
     fun addService(service: ServiceEntity) {
         viewModelScope.launch {
             repository.insertService(service)
+        }
+    }
+
+    fun addServiceAndGet(service: ServiceEntity, onResult: (Long) -> Unit) {
+        viewModelScope.launch {
+            val id = repository.insertService(service)
+            onResult(id)
         }
     }
 
