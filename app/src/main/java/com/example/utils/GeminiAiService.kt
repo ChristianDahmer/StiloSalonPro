@@ -45,7 +45,7 @@ object GeminiAiService {
         rawMessage: String,
         availableServices: List<ServiceEntity>,
         availableProfessionals: List<ProfessionalEntity>,
-        salonName: String = "Elegance Beauty & Spa"
+        salonName: String = "Gold Salão"
     ): AiExtractionResult = withContext(Dispatchers.IO) {
         val apiKey = BuildConfig.GEMINI_API_KEY.trim()
 

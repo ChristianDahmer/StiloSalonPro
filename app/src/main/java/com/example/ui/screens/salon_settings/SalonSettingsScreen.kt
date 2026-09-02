@@ -103,6 +103,8 @@ fun SalonSettingsScreen(
     var darkModeOption by remember(settings) { mutableStateOf(settings.darkModeOption) }
     var useDynamicColor by remember(settings) { mutableStateOf(settings.useDynamicColor) }
     var masterPassword by remember(settings) { mutableStateOf(settings.masterPassword) }
+    var demoModeEnabled by remember(settings) { mutableStateOf(settings.demoModeEnabled) }
+    var demoSpeed by remember(settings) { mutableStateOf(settings.demoSpeed) }
     var headerBackgroundUri by remember(settings) {
         mutableStateOf(settings.headerBackgroundUri.ifBlank { "preset:hero_salon" })
     }
@@ -275,6 +277,66 @@ fun SalonSettingsScreen(
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth().testTag("master_password_input")
                 )
+            }
+        }
+
+        // Section: Modo Demonstrativo com IA & Voz
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth().testTag("demo_mode_card"),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.SmartToy, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Modo Demonstrativo com IA & Voz",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Switch(
+                        checked = demoModeEnabled,
+                        onCheckedChange = { demoModeEnabled = it },
+                        modifier = Modifier.testTag("demo_mode_switch")
+                    )
+                }
+
+                Text(
+                    text = "Ative o modo demonstrativo guiado por voz e inteligência artificial para apresentar os recursos do Gold Salão passo a passo.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                if (demoModeEnabled) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Velocidade da Voz e Demonstração: ${demoSpeed}x",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        listOf(0.75f, 1.0f, 1.25f, 1.5f, 2.0f).forEach { speed ->
+                            FilterChip(
+                                selected = demoSpeed == speed,
+                                onClick = { demoSpeed = speed },
+                                label = { Text("${speed}x") }
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -1108,7 +1170,9 @@ fun SalonSettingsScreen(
                         useDynamicColor = useDynamicColor,
                         masterPassword = masterPassword,
                         bottomNavOrder = NavigationConfig.serializeNavOrder(bottomNavOrderList),
-                        headerBackgroundUri = headerBackgroundUri
+                        headerBackgroundUri = headerBackgroundUri,
+                        demoModeEnabled = demoModeEnabled,
+                        demoSpeed = demoSpeed
                     )
                     viewModel.saveSettings(updated)
                     Toast.makeText(context, "Configurações do salão salvas com sucesso!", Toast.LENGTH_SHORT).show()

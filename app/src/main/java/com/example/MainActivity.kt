@@ -25,7 +25,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.SalonViewModel
+import com.example.ui.components.AiDemoTourOverlay
 import com.example.ui.components.ConfirmationAlertDialog
+import com.example.ui.components.FirstUseSetupWizardDialog
 import com.example.ui.components.SalonTopAppBar
 import com.example.ui.screens.appointments.AppointmentsScreen
 import com.example.ui.screens.clients.ClientsScreen
@@ -104,7 +106,7 @@ class MainActivity : ComponentActivity() {
                     "NFSE" -> "Plataforma NFS-e"
                     "WHATSAPP" -> "WhatsApp & Mensagens"
                     "CONFIGURANCOES" -> "Configurações do Salão"
-                    else -> "Gestão de Salão"
+                    else -> "Gold Salão"
                 }
 
                 val isGridView = viewModeGrid[currentNavTab] ?: false
@@ -311,6 +313,31 @@ class MainActivity : ComponentActivity() {
                         message = confirmationDialogText!!,
                         onConfirm = { viewModel.confirmAction() },
                         onDismiss = { viewModel.dismissConfirmation() }
+                    )
+                }
+
+                AiDemoTourOverlay(
+                    isDemoActive = settings.demoModeEnabled,
+                    demoSpeed = settings.demoSpeed,
+                    onSpeedChange = { newSpeed ->
+                        val updated = settings.copy(demoSpeed = newSpeed)
+                        viewModel.saveSettings(updated)
+                    },
+                    onCloseDemo = {
+                        val updated = settings.copy(demoModeEnabled = false)
+                        viewModel.saveSettings(updated)
+                    },
+                    onNavigateTab = { tab ->
+                        currentNavTab = tab
+                    }
+                )
+
+                if (!settings.isFirstUseCompleted) {
+                    FirstUseSetupWizardDialog(
+                        settings = settings,
+                        onCompleteSetup = { updatedSettings ->
+                            viewModel.saveSettings(updatedSettings)
+                        }
                     )
                 }
             }

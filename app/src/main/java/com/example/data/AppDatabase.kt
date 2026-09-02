@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.BuildConfig
 import com.example.data.dao.SalonDao
 import com.example.data.model.*
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +31,7 @@ import kotlinx.coroutines.launch
         ProcedureHistoryEntity::class,
         VipSubscriptionEntity::class
     ],
-    version = 8,
+    version = 10,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -41,13 +42,48 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+        private val MIGRATION_8_9 = object : androidx.room.migration.Migration(8, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE salon_settings ADD COLUMN demoModeEnabled INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE salon_settings ADD COLUMN demoSpeed REAL NOT NULL DEFAULT 1.0")
+            }
+        }
+
+        private val MIGRATION_9_10 = object : androidx.room.migration.Migration(9, 10) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE salon_settings ADD COLUMN isFirstUseCompleted INTEGER NOT NULL DEFAULT 1")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
+                val prefs = context.getSharedPreferences("gold_salao_version_prefs", Context.MODE_PRIVATE)
+                val currentVersionCode = try {
+                    val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) pInfo.longVersionCode else pInfo.versionCode.toLong()
+                } catch (e: Exception) {
+                    1L
+                }
+                val savedVersionCode = prefs.getLong("last_version_code", -1L)
+
+                if (savedVersionCode == -1L) {
+                    // Fresh installation
+                    if (!BuildConfig.DEBUG) {
+                        // Published release build: clear database so it starts empty
+                        context.deleteDatabase("salon_beauty_db")
+                    }
+                } else if (currentVersionCode > savedVersionCode) {
+                    // App update over existing installed version: preserve all data (do NOT delete database)
+                }
+
+                prefs.edit().putLong("last_version_code", currentVersionCode).apply()
+
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "salon_beauty_db"
                 )
+                .addMigrations(MIGRATION_8_9, MIGRATION_9_10)
                 .fallbackToDestructiveMigration()
                 .addCallback(DatabaseCallback())
                 .build()
@@ -68,15 +104,16 @@ abstract class AppDatabase : RoomDatabase() {
                 dao.insertOrUpdateSettings(
                     SalonSettingsEntity(
                         id = 1,
-                        razaoSocial = "Salão de Beleza Elegance Ltda",
-                        nomeFantasia = "Elegance Beauty & Spa",
+                        razaoSocial = "Gold Salão Ltda",
+                        nomeFantasia = "Gold Salão",
                         cnpj = "12.345.678/0001-90",
                         inscricaoEstadual = "123.456.789.110",
                         defaultStartScreen = "AGENDAMENTOS",
                         themePalette = "ROSE_GOLD",
                         darkModeOption = "SYSTEM",
                         useDynamicColor = false,
-                        headerBackgroundUri = "preset:hero_salon"
+                        headerBackgroundUri = "preset:hero_salon",
+                        isFirstUseCompleted = false
                     )
                 )
 
@@ -257,7 +294,7 @@ abstract class AppDatabase : RoomDatabase() {
                     WhatsAppLogEntity(
                         recipientName = "Mariana Silva",
                         recipientPhone = "(11) 98765-4321",
-                        messageText = "Olá, Mariana Silva! Seu agendamento para Corte Feminino & Escova no Elegance Beauty & Spa está CONFIRMADO.",
+                        messageText = "Olá, Mariana Silva! Seu agendamento para Corte Feminino & Escova no Gold Salão está CONFIRMADO.",
                         status = "ENVIADO",
                         campaignName = "Confirmação Direta"
                     )

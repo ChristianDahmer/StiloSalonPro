@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "salon_settings")
 data class SalonSettingsEntity(
     @PrimaryKey val id: Int = 1,
-    val razaoSocial: String = "Salão de Beleza Elegance Ltda",
-    val nomeFantasia: String = "Elegance Beauty & Spa",
+    val razaoSocial: String = "Gold Salão Ltda",
+    val nomeFantasia: String = "Gold Salão",
     val cnpj: String = "12.345.678/0001-90",
     val inscricaoEstadual: String = "123.456.789.110",
     val defaultStartScreen: String = "AGENDAMENTOS", // AGENDAMENTOS, SERVICOS, PROFISSIONAIS, CLIENTES, NFSE, WHATSAPP
@@ -19,7 +19,10 @@ data class SalonSettingsEntity(
     val accentColorHex: String = "#F06292",
     val masterPassword: String = "1234",
     val bottomNavOrder: String = "AGENDAMENTOS,CLIENTES,FINANCEIRO,WHATSAPP,NFSE,SERVICOS,PROFISSIONAIS,CONFIGURANCOES",
-    val headerBackgroundUri: String = "preset:hero_salon"
+    val headerBackgroundUri: String = "preset:hero_salon",
+    val demoModeEnabled: Boolean = false,
+    val demoSpeed: Float = 1.0f,
+    val isFirstUseCompleted: Boolean = false
 )
 
 @Entity(tableName = "clients")

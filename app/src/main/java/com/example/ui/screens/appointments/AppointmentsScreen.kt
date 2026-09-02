@@ -265,7 +265,7 @@ fun AppointmentsScreen(
                         Spacer(modifier = Modifier.width(6.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Seu Salão Elegance",
+                                text = "Gold Salão",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -1320,6 +1320,7 @@ fun AppointmentFormDialog(
     if (showClientFormDialog) {
         ClientFormDialog(
             client = clientToEdit,
+            paymentMethod = paymentMethod,
             onDismiss = { showClientFormDialog = false },
             onSave = { savedClient ->
                 if (clientToEdit == null) {

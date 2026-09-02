@@ -448,6 +448,7 @@ fun ClientGridCard(
 @Composable
 fun ClientFormDialog(
     client: ClientEntity?,
+    paymentMethod: String = "",
     onDismiss: () -> Unit,
     onSave: (ClientEntity) -> Unit
 ) {
@@ -456,6 +457,14 @@ fun ClientFormDialog(
     var phone by remember { mutableStateOf(client?.phone ?: "") }
     var email by remember { mutableStateOf(client?.email ?: "") }
     var birthDate by remember { mutableStateOf(client?.birthDate ?: "1995-05-15") }
+
+    val isPixOrCard = paymentMethod.uppercase().let { it == "PIX" || it == "CARTAO" || it == "CARTÃO" }
+
+    val isFormValid = if (isPixOrCard) {
+        name.isNotBlank() && cpf.isNotBlank() && phone.isNotBlank() && email.isNotBlank()
+    } else {
+        name.isNotBlank()
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -493,7 +502,7 @@ fun ClientFormDialog(
                                     )
                                     onSave(newC)
                                 },
-                                enabled = name.isNotBlank() && phone.isNotBlank(),
+                                enabled = isFormValid,
                                 modifier = Modifier
                                     .padding(end = 8.dp)
                                     .testTag("save_client_button"),
@@ -514,7 +523,7 @@ fun ClientFormDialog(
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = "Informações do Cliente",
+                        text = if (isPixOrCard) "Informações do Cliente (Obrigatório para Pix/Cartão: Nome, CPF, Telefone e E-mail)" else "Informações do Cliente",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -531,23 +540,23 @@ fun ClientFormDialog(
                     MaskedOutlinedTextField(
                         value = cpf,
                         onValueChange = { cpf = it },
-                        label = "CPF",
+                        label = if (isPixOrCard) "CPF *" else "CPF",
                         maskType = "CPF",
-                        isRequired = true
+                        isRequired = isPixOrCard
                     )
 
                     MaskedOutlinedTextField(
                         value = phone,
                         onValueChange = { phone = it },
-                        label = "Telefone com WhatsApp",
+                        label = if (isPixOrCard) "Telefone com WhatsApp *" else "Telefone com WhatsApp",
                         maskType = "PHONE",
-                        isRequired = true
+                        isRequired = isPixOrCard
                     )
 
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("E-mail") },
+                        label = { Text(if (isPixOrCard) "E-mail *" else "E-mail") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
