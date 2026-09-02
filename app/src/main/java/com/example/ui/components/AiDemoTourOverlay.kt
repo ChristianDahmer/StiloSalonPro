@@ -29,6 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.*
 
+enum class VoiceGender {
+    FEMININE,
+    MASCULINE
+}
+
 data class DemoStep(
     val id: String,
     val title: String,
@@ -39,7 +44,8 @@ data class DemoStep(
     val formExampleTitle: String,
     val formExampleFields: List<Pair<String, String>>,
     val actionButtonText: String,
-    val narrationText: String
+    val narrationTextFemale: String,
+    val narrationTextMale: String
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,19 +63,21 @@ fun AiDemoTourOverlay(
     var tts by remember { mutableStateOf<TextToSpeech?>(null) }
     var ttsInitialized by remember { mutableStateOf(false) }
 
-    // Humanized voice configuration state
+    // Humanized voice configuration state - default to FEMININE voice
+    var selectedGender by remember { mutableStateOf(VoiceGender.FEMININE) }
     val availableVoices = remember { mutableStateListOf<Voice>() }
     var selectedVoiceName by remember { mutableStateOf<String?>(null) }
-    var voicePitch by remember { mutableStateOf(0.93f) } // Slightly deeper, warm masculine acoustic resonance
+    // Warm, clear, natural pitch for feminine voice (1.08f) and warm masculine (0.93f)
+    var voicePitch by remember { mutableStateOf(1.08f) }
     var showVoiceSettings by remember { mutableStateOf(false) }
 
     val steps = remember {
         listOf(
             DemoStep(
                 id = "INTRO",
-                title = "Bem-vindo à Demonstração do Gold Salão",
+                title = "Bem-vinda à Demonstração do Gold Salão",
                 moduleBadge = "Visão Geral",
-                description = "Neste tour interativo guiado por voz humanizada, você verá exatamente como incluir registros em cada módulo do sistema com facilidade.",
+                description = "Neste tour interativo guiado por voz feminina humanizada, você verá exatamente como incluir registros em cada módulo do sistema com facilidade.",
                 targetTab = "AGENDAMENTOS",
                 stepsToAdd = listOf(
                     "Navegue entre os módulos usando a barra de atalhos ou os botões de avançar.",
@@ -81,10 +89,11 @@ fun AiDemoTourOverlay(
                 formExampleFields = listOf(
                     "Operação" to "Gestão Completa de Salão de Beleza",
                     "Integrações" to "Agenda, WhatsApp Inteligente, NFS-e e Fluxo de Caixa",
-                    "Modo de Demonstração" to "Ativo com Narração em Voz Masculina Humanizada"
+                    "Modo de Demonstração" to "Ativo com Narração em Voz Feminina Natural"
                 ),
                 actionButtonText = "Iniciar Demonstração Passo a Passo",
-                narrationText = "Olá! Seja muito bem-vindo ao Gold Salão. Eu sou o seu assistente virtual e vou acompanhar você em uma demonstração prática e completa... Em cada módulo, vou te mostrar onde clicar e como preencher os dados para cadastrar seus agendamentos, clientes, serviços, lançamentos de caixa e notas fiscais com total rapidez. Vamos começar?"
+                narrationTextFemale = "Olá! Seja muito bem-vinda ao Gold Salão! Eu sou a sua assistente virtual e vou te acompanhar em uma demonstração prática e super acolhedora... Em cada módulo, vou te mostrar onde clicar e como preencher os dados para cadastrar seus agendamentos, clientes, procedimentos, caixa e notas fiscais com total facilidade e rapidez. Vamos começar?",
+                narrationTextMale = "Olá! Seja muito bem-vindo ao Gold Salão. Eu sou o seu assistente virtual e vou acompanhar você em uma demonstração prática e completa... Em cada módulo, vou te mostrar onde clicar e como preencher os dados para cadastrar seus agendamentos, clientes, serviços, lançamentos de caixa e notas fiscais com total rapidez. Vamos começar?"
             ),
             DemoStep(
                 id = "AGENDAMENTOS",
@@ -108,7 +117,8 @@ fun AiDemoTourOverlay(
                     "Valor Total" to "R$ 120,00 (Pix)"
                 ),
                 actionButtonText = "Confirmar Agendamento",
-                narrationText = "Aqui no módulo de Agendamentos, registrar um novo horário é super simples e rápido... Primeiro, dê um toque no botão com o sinal de mais, no canto inferior direito. Em seguida, selecione a cliente, o serviço e o profissional responsável... Depois, escolha a data, o melhor horário na grade e a forma de pagamento... Por fim, toque em Confirmar Agendamento. O horário fica imediatamente reservado na sua grade e o lembrete automático do WhatsApp já fica pronto para envio!"
+                narrationTextFemale = "Aqui no módulo de Agendamentos, registrar um novo horário é super simples e gostoso de fazer... Primeiro, dê um toque no botão com o sinal de mais, no cantinho inferior direito. Em seguida, selecione a cliente, o serviço e a profissional responsável... Depois, escolha a data, o melhor horário na grade e a forma de pagamento... Por fim, toque em Confirmar Agendamento. O horário fica reservado na hora e o lembrete carinhoso do WhatsApp já fica prontinho para envio!",
+                narrationTextMale = "Aqui no módulo de Agendamentos, registrar um novo horário é super simples e rápido... Primeiro, dê um toque no botão com o sinal de mais, no canto inferior direito. Em seguida, selecione a cliente, o serviço e o profissional responsável... Depois, escolha a data, o melhor horário na grade e a forma de pagamento... Por fim, toque em Confirmar Agendamento. O horário fica imediatamente reservado na sua grade e o lembrete automático do WhatsApp já fica pronto para envio!"
             ),
             DemoStep(
                 id = "CLIENTES",
@@ -132,7 +142,8 @@ fun AiDemoTourOverlay(
                     "Aniversário" to "15/10 (Campanhas automáticas ativadas)"
                 ),
                 actionButtonText = "Salvar Cliente",
-                narrationText = "No módulo de Clientes, manter a sua base atualizada garante um atendimento personalizado e agiliza suas notas fiscais... Para cadastrar um cliente, toque no botão com o sinal de mais no topo da tela. Digite o nome completo e o WhatsApp com o DDD... É muito importante também preencher o CPF e o e-mail, pois eles são exigidos para a emissão da NFS-e. Você pode também adicionar a data de aniversário para felicitações automáticas... Agora, basta tocar em Salvar Cliente!"
+                narrationTextFemale = "No módulo de Clientes, manter a sua base organizada garante um atendimento encantador e agiliza suas notas fiscais... Para cadastrar uma cliente, toque no botão de mais no topo da tela. Digite o nome completo e o WhatsApp com o DDD... É muito importante também preencher o CPF e o e-mail, pois eles são necessários para a emissão da NFS-e. Ah, e adicione a data de aniversário para mensagens automáticas carinhosas! Agora, basta tocar em Salvar Cliente!",
+                narrationTextMale = "No módulo de Clientes, manter a sua base atualizada garante um atendimento personalizado e agiliza suas notas fiscais... Para cadastrar um cliente, toque no botão com o sinal de mais no topo da tela. Digite o nome completo e o WhatsApp com o DDD... É muito importante também preencher o CPF e o e-mail, pois eles são exigidos para a emissão da NFS-e. Você pode também adicionar a data de aniversário para felicitações automáticas... Agora, basta tocar em Salvar Cliente!"
             ),
             DemoStep(
                 id = "SERVICOS",
@@ -156,7 +167,8 @@ fun AiDemoTourOverlay(
                     "Status" to "Ativo no catálogo"
                 ),
                 actionButtonText = "Salvar Serviço",
-                narrationText = "No catálogo de Serviços, você organiza o cardápio de procedimentos do seu salão... Para incluir um novo serviço, dê um toque no botão de mais. Preencha o nome do procedimento, como hidratação capilar, coloração ou manicure, e escolha a categoria... Em seguida, defina o preço sugerido e a duração estimada em minutos... Toque em Salvar Serviço, e ele já estará imediatamente disponível para comandas e novos agendamentos!"
+                narrationTextFemale = "No catálogo de Serviços, você organiza todo o cardápio de procedimentos do seu salão com elegância... Para incluir um novo serviço, dê um toque no botão de mais. Preencha o nome do procedimento, como hidratação capilar, coloração ou manicure, e selecione a categoria... Em seguida, defina o preço e a duração estimada em minutos... Toque em Salvar Serviço, e ele já estará prontinho para comandas e novos agendamentos!",
+                narrationTextMale = "No catálogo de Serviços, você organiza o cardápio de procedimentos do seu salão... Para incluir um novo serviço, dê um toque no botão de mais. Preencha o nome do procedimento, como hidratação capilar, coloração ou manicure, e escolha a categoria... Em seguida, defina o preço sugerido e a duração estimada em minutos... Toque em Salvar Serviço, e ele já estará imediatamente disponível para comandas e novos agendamentos!"
             ),
             DemoStep(
                 id = "PROFISSIONAIS",
@@ -180,7 +192,8 @@ fun AiDemoTourOverlay(
                     "Cor da Agenda" to "Rosa Dourado (#E08E79)"
                 ),
                 actionButtonText = "Salvar Profissional",
-                narrationText = "Na gestão de Profissionais, você cadastra sua equipe e define as regras de cada parceiro... Para cadastrar um colaborador, toque no botão de mais. Insira o nome, o WhatsApp e as especialidades atendidas... Depois, defina a porcentagem de comissão e escolha uma cor de destaque para identificar a coluna desse profissional na agenda... Finalize tocando em Salvar Profissional, e a escala dele já estará ativa!"
+                narrationTextFemale = "Na gestão de Profissionais, você cadastra sua equipe e valoriza cada parceiro do salão... Para cadastrar um colaborador, toque no botão de mais. Insira o nome, o WhatsApp e as especialidades atendidas... Depois, defina a porcentagem de comissão e escolha uma cor de destaque para identificar a coluna desse profissional na agenda... Finalize tocando em Salvar Profissional, e a escala dele já estará totalmente ativa!",
+                narrationTextMale = "Na gestão de Profissionais, você cadastra sua equipe e define as regras de cada parceiro... Para cadastrar um colaborador, toque no botão de mais. Insira o nome, o WhatsApp e as especialidades atendidas... Depois, defina a porcentagem de comissão e escolha uma cor de destaque para identificar a coluna desse profissional na agenda... Finalize tocando em Salvar Profissional, e a escala dele já estará ativa!"
             ),
             DemoStep(
                 id = "FINANCEIRO",
@@ -204,7 +217,8 @@ fun AiDemoTourOverlay(
                     "Categoria" to "Procedimentos de Salão"
                 ),
                 actionButtonText = "Salvar Lançamento",
-                narrationText = "Aqui no módulo Financeiro, você tem o controle total do caixa do seu salão... Para criar um lançamento, toque em Nova Movimentação. Escolha se é uma Entrada de receita ou uma Saída de despesa operacional... Digite a descrição, informe o valor, selecione a categoria e o meio de pagamento... Ao tocar em Salvar Lançamento, seu saldo e os relatórios de lucratividade são recalculados no mesmo instante!"
+                narrationTextFemale = "Aqui no módulo Financeiro, você tem o controle total do caixa do seu salão com muita clareza... Para criar um lançamento, toque em Nova Movimentação. Escolha se é uma Entrada de receita ou uma Saída de despesa operacional... Digite a descrição, informe o valor, selecione a categoria e o meio de pagamento... Ao tocar em Salvar Lançamento, seu saldo e os relatórios de lucro são recalculados no mesmo instante!",
+                narrationTextMale = "Aqui no módulo Financeiro, você tem o controle total do caixa do seu salão... Para criar um lançamento, toque em Nova Movimentação. Escolha se é uma Entrada de receita ou uma Saída de despesa operacional... Digite a descrição, informe o valor, selecione a categoria e o meio de pagamento... Ao tocar em Salvar Lançamento, seu saldo e os relatórios de lucratividade são recalculados no mesmo instante!"
             ),
             DemoStep(
                 id = "NFSE",
@@ -228,7 +242,8 @@ fun AiDemoTourOverlay(
                     "Status da Nota" to "Pronto para Transmissão na Prefeitura"
                 ),
                 actionButtonText = "Transmitir e Emitir NFS-e",
-                narrationText = "No módulo de NFS-e, emitir as notas fiscais dos atendimentos é simples e totalmente seguro... Ao concluir um serviço ou tocar em Emitir Nova NFS-e, os dados cadastrais do cliente com CPF e e-mail já são carregados automaticamente... Você confere a descrição do serviço, a alíquota municipal de ISS e o valor... Em seguida, basta tocar em Transmitir e Emitir NFS-e para gerar o documento fiscal oficial da prefeitura!"
+                narrationTextFemale = "No módulo de NFS-e, emitir as notas fiscais dos atendimentos é muito prático e totalmente seguro... Ao concluir um serviço ou tocar em Emitir Nova NFS-e, os dados cadastrais da cliente com CPF e e-mail já são carregados automaticamente... Você confere a descrição do serviço, a alíquota municipal de ISS e o valor... Em seguida, basta tocar em Transmitir e Emitir NFS-e para gerar o documento fiscal oficial da prefeitura!",
+                narrationTextMale = "No módulo de NFS-e, emitir as notas fiscais dos atendimentos é simples e totalmente seguro... Ao concluir um serviço ou tocar em Emitir Nova NFS-e, os dados cadastrais do cliente com CPF e e-mail já são carregados automaticamente... Você confere a descrição do serviço, a alíquota municipal de ISS e o valor... Em seguida, basta tocar em Transmitir e Emitir NFS-e para gerar o documento fiscal oficial da prefeitura!"
             ),
             DemoStep(
                 id = "WHATSAPP",
@@ -251,7 +266,8 @@ fun AiDemoTourOverlay(
                     "Status" to "Pronto para envio imediato"
                 ),
                 actionButtonText = "Enviar via WhatsApp",
-                narrationText = "No módulo de WhatsApp, a inteligência artificial ajuda a encantar seus clientes e reduzir faltas... Para enviar uma mensagem, toque em Nova Mensagem e selecione o cliente. Você pode escolher um modelo pronto ou usar nossa inteligência artificial para criar uma mensagem calorosa e personalizada... Em seguida, toque em Enviar via WhatsApp. A conversa se abre diretamente no aplicativo oficial com o texto pronto em um único clique!"
+                narrationTextFemale = "No módulo de WhatsApp, a nossa inteligência artificial ajuda a encantar seus clientes e reduzir faltas com muito carinho... Para enviar uma mensagem, toque em Nova Mensagem e selecione o cliente. Você pode escolher um modelo pronto ou usar nossa IA para criar uma mensagem calorosa e personalizada... Em seguida, toque em Enviar via WhatsApp. A conversa se abre diretamente no aplicativo oficial com o texto prontinho em um único toque!",
+                narrationTextMale = "No módulo de WhatsApp, a inteligência artificial ajuda a encantar seus clientes e reduzir faltas... Para enviar uma mensagem, toque em Nova Mensagem e selecione o cliente. Você pode escolher um modelo pronto ou usar nossa inteligência artificial para criar uma mensagem calorosa e personalizada... Em seguida, toque em Enviar via WhatsApp. A conversa se abre diretamente no aplicativo oficial com o texto pronto em um único clique!"
             ),
             DemoStep(
                 id = "CONFIGURANCOES",
@@ -275,18 +291,65 @@ fun AiDemoTourOverlay(
                     "Senha Mestre" to "•••• (Proteção Ativa)"
                 ),
                 actionButtonText = "Salvar Configurações do Salão",
-                narrationText = "Nas Configurações, você deixa o sistema com a identidade do seu salão... Aqui você atualiza o nome fantasia, a razão social, o CNPJ e telefones. Você pode também escolher sua paleta de cores favorita, como Rose Gold ou Royal Violet, e configurar a senha de segurança para proteger cancelamentos e o caixa... Para concluir, é só tocar em Salvar Configurações!"
+                narrationTextFemale = "Nas Configurações, você deixa o sistema com a identidade e o estilo do seu salão... Aqui você atualiza o nome fantasia, a razão social, o CNPJ e telefones. Você pode também escolher sua paleta de cores favorita, como Rose Gold ou Royal Violet, e configurar a senha de segurança para proteger o caixa e cancelamentos... Para concluir, é só tocar em Salvar Configurações!",
+                narrationTextMale = "Nas Configurações, você deixa o sistema com a identidade do seu salão... Aqui você atualiza o nome fantasia, a razão social, o CNPJ e telefones. Você pode também escolher sua paleta de cores favorita, como Rose Gold ou Royal Violet, e configurar a senha de segurança para proteger cancelamentos e o caixa... Para concluir, é só tocar em Salvar Configurações!"
             )
         )
     }
 
-    // Initialize TTS with high-quality media audio pipeline and natural male voice detection
+    // Helper function to pick the appropriate voice based on selected gender
+    fun applyVoiceForGender(gender: VoiceGender, ttsInstance: TextToSpeech?) {
+        if (ttsInstance == null) return
+        try {
+            val allPtVoices = ttsInstance.voices?.filter { v ->
+                val lang = v.locale.language.lowercase()
+                lang == "pt" || lang.startsWith("pt")
+            } ?: emptyList()
+
+            val chosenVoice = if (gender == VoiceGender.FEMININE) {
+                allPtVoices.sortedWith(
+                    compareByDescending<Voice> { v -> v.quality }
+                        .thenByDescending { v ->
+                            val n = v.name.lowercase()
+                            var score = 0
+                            if (n.contains("female") || n.contains("feminino") || n.contains("mulher")) score += 6
+                            if (n.contains("pt-br-x-jab") || n.contains("pt-br-x-jbf") || n.contains("pt-br-x-ybf") || n.contains("pt-br-x-ptf")) score += 5
+                            if (n.contains("network") || n.contains("neural") || n.contains("wavenet")) score += 3
+                            if (n.contains("male") || n.contains("masculino")) score -= 5
+                            score
+                        }
+                ).firstOrNull()
+            } else {
+                allPtVoices.sortedWith(
+                    compareByDescending<Voice> { v -> v.quality }
+                        .thenByDescending { v ->
+                            val n = v.name.lowercase()
+                            var score = 0
+                            if (n.contains("male") || n.contains("masculino") || n.contains("homem")) score += 6
+                            if (n.contains("pt-br-x-ybd") || n.contains("pt-br-x-ptd") || n.contains("pt-br-x-afs")) score += 5
+                            if (n.contains("network") || n.contains("neural") || n.contains("wavenet")) score += 3
+                            if (n.contains("female") || n.contains("feminino")) score -= 5
+                            score
+                        }
+                ).firstOrNull()
+            }
+
+            if (chosenVoice != null) {
+                ttsInstance.voice = chosenVoice
+                selectedVoiceName = chosenVoice.name
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    // Initialize TTS with high-quality media audio pipeline and natural Brazilian voices
     LaunchedEffect(Unit) {
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 tts?.language = Locale("pt", "BR")
 
-                // High fidelity speech routing (avoids low-bitrate phone call audio compression)
+                // High fidelity speech routing
                 try {
                     val audioAttributes = AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_MEDIA)
@@ -297,45 +360,23 @@ fun AiDemoTourOverlay(
                     e.printStackTrace()
                 }
 
-                // Scan available voices and prioritize natural humanized male Brazilian voices
+                // Scan available voices in pt-BR
                 try {
                     val voices = tts?.voices?.filter { v ->
                         val lang = v.locale.language.lowercase()
                         lang == "pt" || lang.startsWith("pt")
-                    }?.sortedWith(
-                        compareByDescending<Voice> { v ->
-                            // Prioritize high/very high quality neural synthesis models
-                            v.quality
-                        }.thenByDescending { v ->
-                            val name = v.name.lowercase()
-                            var score = 0
-                            if (name.contains("network") || name.contains("neural") || name.contains("wavenet")) score += 3
-                            if (name.contains("male") || name.contains("masculino") || name.contains("pt-br-x-ybd") || name.contains("pt-br-x-ptd") || name.contains("pt-br-x-afs")) score += 4
-                            if (name.contains("female") || name.contains("feminino")) score -= 2
-                            score
-                        }
-                    ) ?: emptyList()
+                    } ?: emptyList()
 
                     availableVoices.clear()
                     availableVoices.addAll(voices)
 
-                    // Find the best humanized male voice
-                    val bestVoice = voices.firstOrNull { v ->
-                        val name = v.name.lowercase()
-                        name.contains("male") || name.contains("masculino") ||
-                        name.contains("pt-br-x-ybd") || name.contains("pt-br-x-ptd") ||
-                        name.contains("pt-br-x-afs") || (!name.contains("female") && !name.contains("feminino"))
-                    } ?: voices.firstOrNull()
-
-                    if (bestVoice != null) {
-                        tts?.voice = bestVoice
-                        selectedVoiceName = bestVoice.name
-                    }
+                    // Default to natural feminine voice
+                    applyVoiceForGender(VoiceGender.FEMININE, tts)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
 
-                // Set warm, humanized pitch & smooth conversational speech rate
+                // Set warm, humanized feminine pitch & smooth conversational speech rate
                 tts?.setPitch(voicePitch)
                 tts?.setSpeechRate(demoSpeed)
                 ttsInitialized = true
@@ -350,8 +391,8 @@ fun AiDemoTourOverlay(
         }
     }
 
-    // React to speed, pitch, and voice changes
-    LaunchedEffect(demoSpeed, voicePitch, selectedVoiceName, ttsInitialized) {
+    // React to speed, pitch, gender, and voice changes
+    LaunchedEffect(demoSpeed, voicePitch, selectedGender, selectedVoiceName, ttsInitialized) {
         if (ttsInitialized && tts != null) {
             tts?.setSpeechRate(demoSpeed)
             tts?.setPitch(voicePitch)
@@ -364,12 +405,18 @@ fun AiDemoTourOverlay(
         }
     }
 
+    // Helper to get active narration text based on gender
+    val getCurrentNarration = { step: DemoStep ->
+        if (selectedGender == VoiceGender.FEMININE) step.narrationTextFemale else step.narrationTextMale
+    }
+
     // Speak narration and navigate when step changes
-    LaunchedEffect(currentStepIndex, isPlaying, ttsInitialized) {
+    LaunchedEffect(currentStepIndex, isPlaying, ttsInitialized, selectedGender) {
         if (isDemoActive && isPlaying && ttsInitialized && currentStepIndex < steps.size) {
             val step = steps[currentStepIndex]
             onNavigateTab(step.targetTab)
-            tts?.speak(step.narrationText, TextToSpeech.QUEUE_FLUSH, null, "DEMO_UTTERANCE_${step.id}")
+            val textToSpeak = getCurrentNarration(step)
+            tts?.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null, "DEMO_UTTERANCE_${step.id}")
         }
     }
 
@@ -424,21 +471,21 @@ fun AiDemoTourOverlay(
                             Column {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Text(
-                                        text = "Guia Interativo com Voz Humanizada",
+                                        text = "Guia com Voz Humanizada",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                     Surface(
                                         shape = RoundedCornerShape(4.dp),
-                                        color = MaterialTheme.colorScheme.secondaryContainer
+                                        color = if (selectedGender == VoiceGender.FEMININE) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.secondaryContainer
                                     ) {
                                         Text(
-                                            text = "Voz Masculina Natural",
+                                            text = if (selectedGender == VoiceGender.FEMININE) "Voz Feminina Natural" else "Voz Masculina Natural",
                                             fontSize = 9.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                            color = if (selectedGender == VoiceGender.FEMININE) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
+                                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
                                         )
                                     }
                                 }
@@ -730,7 +777,7 @@ fun AiDemoTourOverlay(
                                     }
 
                                     TextButton(onClick = { showVoiceSettings = !showVoiceSettings }) {
-                                        Text(if (showVoiceSettings) "Recolher" else "Personalizar")
+                                        Text(if (showVoiceSettings) "Recolher" else "Personalizar Voz")
                                         Icon(
                                             if (showVoiceSettings) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                                             contentDescription = null
@@ -743,9 +790,75 @@ fun AiDemoTourOverlay(
                                         modifier = Modifier.padding(top = 8.dp),
                                         verticalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
-                                        // Timbre / Tom Masculino
+                                        // Gênero da Voz (Feminina ou Masculina)
                                         Text(
-                                            text = "Timbre & Ressonância Masculina:",
+                                            text = "Selecione a Voz do Assistente:",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            FilterChip(
+                                                selected = selectedGender == VoiceGender.FEMININE,
+                                                onClick = {
+                                                    selectedGender = VoiceGender.FEMININE
+                                                    voicePitch = 1.08f // Natural warm feminine pitch
+                                                    applyVoiceForGender(VoiceGender.FEMININE, tts)
+                                                    tts?.setPitch(1.08f)
+                                                    // Immediately speak a brief welcoming sample
+                                                    tts?.stop()
+                                                    tts?.speak(
+                                                        "Voz feminina ativada com sucesso. Olá! Sou a sua assistente Gold Salão.",
+                                                        TextToSpeech.QUEUE_FLUSH,
+                                                        null,
+                                                        "SAMPLE_FEMALE"
+                                                    )
+                                                },
+                                                label = { Text("Voz Feminina (Padrão)", fontWeight = FontWeight.Bold) },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        Icons.Default.Face,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                },
+                                                modifier = Modifier.weight(1f)
+                                            )
+
+                                            FilterChip(
+                                                selected = selectedGender == VoiceGender.MASCULINE,
+                                                onClick = {
+                                                    selectedGender = VoiceGender.MASCULINE
+                                                    voicePitch = 0.93f // Natural warm masculine pitch
+                                                    applyVoiceForGender(VoiceGender.MASCULINE, tts)
+                                                    tts?.setPitch(0.93f)
+                                                    // Immediately speak a brief sample
+                                                    tts?.stop()
+                                                    tts?.speak(
+                                                        "Voz masculina ativada. Olá! Sou o seu assistente Gold Salão.",
+                                                        TextToSpeech.QUEUE_FLUSH,
+                                                        null,
+                                                        "SAMPLE_MALE"
+                                                    )
+                                                },
+                                                label = { Text("Voz Masculina") },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        Icons.Default.RecordVoiceOver,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                },
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                        }
+
+                                        // Timbre / Tom
+                                        Text(
+                                            text = if (selectedGender == VoiceGender.FEMININE) "Timbre & Entonação Feminina:" else "Timbre & Ressonância Masculina:",
                                             style = MaterialTheme.typography.labelMedium,
                                             fontWeight = FontWeight.SemiBold
                                         )
@@ -754,11 +867,21 @@ fun AiDemoTourOverlay(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
-                                            listOf(
-                                                0.88f to "Grave Encorpado",
-                                                0.93f to "Natural & Acolhedor",
-                                                1.00f to "Neutro / Padrão"
-                                            ).forEach { (pitch, label) ->
+                                            val pitchOptions = if (selectedGender == VoiceGender.FEMININE) {
+                                                listOf(
+                                                    1.00f to "Suave / Natural",
+                                                    1.08f to "Acolhedora & Clara",
+                                                    1.15f to "Vibrante & Doce"
+                                                )
+                                            } else {
+                                                listOf(
+                                                    0.88f to "Grave Encorpado",
+                                                    0.93f to "Natural & Acolhedor",
+                                                    1.00f to "Neutro / Padrão"
+                                                )
+                                            }
+
+                                            pitchOptions.forEach { (pitch, label) ->
                                                 FilterChip(
                                                     selected = voicePitch == pitch,
                                                     onClick = { voicePitch = pitch },
@@ -797,7 +920,7 @@ fun AiDemoTourOverlay(
                                         // Available voice profiles if multiple are installed on device
                                         if (availableVoices.size > 1) {
                                             Text(
-                                                text = "Perfil de Voz Detectado no Sistema:",
+                                                text = "Vozes Neurais Detectadas no Android:",
                                                 style = MaterialTheme.typography.labelMedium,
                                                 fontWeight = FontWeight.SemiBold
                                             )
@@ -807,13 +930,10 @@ fun AiDemoTourOverlay(
                                                     .horizontalScroll(rememberScrollState()),
                                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                                             ) {
-                                                availableVoices.take(4).forEachIndexed { idx, voice ->
+                                                availableVoices.take(5).forEachIndexed { idx, voice ->
                                                     val isSelected = selectedVoiceName == voice.name
-                                                    val displayName = if (voice.name.contains("ybd", true) || voice.name.contains("male", true)) {
-                                                        "Voz Masculina Neural ${idx + 1}"
-                                                    } else {
-                                                        "Voz Natural ${idx + 1}"
-                                                    }
+                                                    val isFemale = voice.name.lowercase().let { it.contains("female") || it.contains("pt-br-x-jab") || it.contains("pt-br-x-ybf") || it.contains("pt-br-x-jbf") }
+                                                    val displayName = if (isFemale) "Feminina Neural ${idx + 1}" else "Voz Neural ${idx + 1}"
                                                     FilterChip(
                                                         selected = isSelected,
                                                         onClick = { selectedVoiceName = voice.name },
@@ -828,8 +948,13 @@ fun AiDemoTourOverlay(
                                             onClick = {
                                                 if (ttsInitialized) {
                                                     tts?.stop()
+                                                    val sampleText = if (selectedGender == VoiceGender.FEMININE) {
+                                                        "Olá! Esta é a voz feminina humanizada do seu assistente Gold Salão. O tom é suave, acolhedor e profissional para apresentar o sistema com carinho."
+                                                    } else {
+                                                        "Olá! Esta é a voz masculina humanizada do seu assistente Gold Salão. O tom e a cadência foram afinados para soar acolhedor e profissional."
+                                                    }
                                                     tts?.speak(
-                                                        "Olá! Esta é a voz masculina humanizada do seu assistente Gold Salão. O tom e a cadência foram afinados para soar acolhedor e profissional.",
+                                                        sampleText,
                                                         TextToSpeech.QUEUE_FLUSH,
                                                         null,
                                                         "TEST_VOICE"
@@ -841,7 +966,7 @@ fun AiDemoTourOverlay(
                                         ) {
                                             Icon(Icons.Default.VolumeUp, contentDescription = null, modifier = Modifier.size(16.dp))
                                             Spacer(modifier = Modifier.width(6.dp))
-                                            Text("Ouvir Amostra com estes Ajustes", fontSize = 12.sp)
+                                            Text("Ouvir Amostra da Voz Feminina", fontSize = 12.sp)
                                         }
                                     }
                                 }
@@ -868,7 +993,7 @@ fun AiDemoTourOverlay(
                                 modifier = Modifier.size(18.dp)
                             )
                             Text(
-                                text = "Áudio Humanizado (${if (demoSpeed == 0.95f) "Conversacional" else "${demoSpeed}x"})",
+                                text = "Áudio ${if (selectedGender == VoiceGender.FEMININE) "Feminino" else "Masculino"} (${if (demoSpeed == 0.95f) "Conversacional" else "${demoSpeed}x"})",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -881,7 +1006,7 @@ fun AiDemoTourOverlay(
                                     if (ttsInitialized) {
                                         tts?.stop()
                                         tts?.speak(
-                                            step.narrationText,
+                                            getCurrentNarration(step),
                                             TextToSpeech.QUEUE_FLUSH,
                                             null,
                                             "REPLAY_${step.id}"
@@ -889,17 +1014,33 @@ fun AiDemoTourOverlay(
                                     }
                                 }
                             ) {
+                                Icon(Icons.Default.Replay, contentDescription = "Repetir Explicação")
+                            }
+
+                            FilledTonalIconButton(
+                                onClick = {
+                                    isPlaying = !isPlaying
+                                    if (!isPlaying) {
+                                        tts?.stop()
+                                    } else if (ttsInitialized) {
+                                        tts?.speak(
+                                            getCurrentNarration(step),
+                                            TextToSpeech.QUEUE_FLUSH,
+                                            null,
+                                            "RESUME_${step.id}"
+                                        )
+                                    }
+                                }
+                            ) {
                                 Icon(
-                                    Icons.Default.Replay,
-                                    contentDescription = "Repetir Narração",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp)
+                                    if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    contentDescription = if (isPlaying) "Pausar" else "Continuar"
                                 )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     // Bottom Navigation Buttons
                     Row(
@@ -913,36 +1054,12 @@ fun AiDemoTourOverlay(
                                     currentStepIndex--
                                 }
                             },
-                            enabled = currentStepIndex > 0
+                            enabled = currentStepIndex > 0,
+                            shape = RoundedCornerShape(12.dp)
                         ) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.ArrowBack, contentDescription = null)
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("Anterior")
-                        }
-
-                        Button(
-                            onClick = {
-                                isPlaying = !isPlaying
-                                if (!isPlaying) {
-                                    tts?.stop()
-                                } else {
-                                    tts?.speak(
-                                        step.narrationText,
-                                        TextToSpeech.QUEUE_FLUSH,
-                                        null,
-                                        "RESUME_${step.id}"
-                                    )
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                        ) {
-                            Icon(
-                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(if (isPlaying) "Pausar" else "Ouvir")
                         }
 
                         Button(
@@ -950,14 +1067,14 @@ fun AiDemoTourOverlay(
                                 if (currentStepIndex < steps.size - 1) {
                                     currentStepIndex++
                                 } else {
-                                    Toast.makeText(context, "Demonstração concluída com sucesso!", Toast.LENGTH_SHORT).show()
                                     onCloseDemo()
                                 }
-                            }
+                            },
+                            shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text(if (currentStepIndex < steps.size - 1) "Próximo" else "Concluir")
+                            Text(if (currentStepIndex < steps.size - 1) "Próximo Módulo" else "Concluir Demonstração")
                             Spacer(modifier = Modifier.width(4.dp))
-                            Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.ArrowForward, contentDescription = null)
                         }
                     }
                 }
